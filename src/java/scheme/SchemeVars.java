@@ -14,7 +14,6 @@ import scheme.tools.*;
 import scheme.tools.admins.AdminsTools;
 import scheme.ui.*;
 import scheme.ui.dialogs.*;
-import scheme.Zaglushka.*;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;

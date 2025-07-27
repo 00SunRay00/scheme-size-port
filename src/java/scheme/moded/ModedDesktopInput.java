@@ -106,6 +106,7 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
         if (locked()) return;
 
         if (observed != null) {
+            if (observed.unit() == null) return;
             camera.position.set(observed.unit()); // idk why, but unit moves smoother
             panning = true;
 
@@ -114,6 +115,7 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
         }
 
         if (movementLocked && !scene.hasKeyboard() && observed == null) {
+            if (player.unit() == null) return;
             drawLocked(player.unit().x, player.unit().y);
             panning = true; // panning is always enabled when unit movement is locked
 

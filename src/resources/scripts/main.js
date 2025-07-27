@@ -9,5 +9,4 @@ const SchemeMain = mod.main
 const SchemeVars = get("scheme.SchemeVars")
 const SchemeUpdater = get("scheme.SchemeUpdater")
 const ServerIntegration = get("scheme.ServerIntegration")
-const ClajIntegration = get("scheme.ClajIntegration")
 const ModedSchematics = get("scheme.moded.ModedSchematics")

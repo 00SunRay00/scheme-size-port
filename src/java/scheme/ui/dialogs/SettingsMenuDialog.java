@@ -18,6 +18,7 @@ public class SettingsMenuDialog {
 
             if (!mobile) table.checkPref("mobilebuttons", true);
 
+//            table.checkPref("crashreports", true); in dev
             table.checkPref("hardscheme", false);
             table.checkPref("approachenabled", true);
             table.checkPref("welcome", true);

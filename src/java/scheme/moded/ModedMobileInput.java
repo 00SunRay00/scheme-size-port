@@ -94,12 +94,17 @@ public class ModedMobileInput extends MobileInput implements ModedInputHandler {
         if (locked()) return;
 
         if (observed != null) {
+            if (observed.unit() == null) return;
             camera.position.set(observed.unit()); // idk why, but unit moves smoother
             if (input.isTouched(0) && !scene.hasMouse()) observed = null;
         }
 
         buildInput();
-        if (movementLocked) drawLocked(player.unit().x, player.unit().y);
+        if (movementLocked) {
+            if (player.unit() == null) return;
+            drawLocked(player.unit().x, player.unit().y);
+        }
+
     }
 
     @Override
