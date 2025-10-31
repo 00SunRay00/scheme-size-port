@@ -7,6 +7,7 @@ import mindustry.content.Blocks;
 import mindustry.game.Schematics;
 import mindustry.gen.Building;
 import mindustry.mod.Mod;
+import mindustry.mod.Mods;
 import mindustry.mod.Scripts;
 import mindustry.type.Item;
 import mindustry.ui.CoreItemsDisplay;
@@ -19,11 +20,17 @@ import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
 import scheme.ui.MapResizeFix;
 
+// Добавлены Claj импорты
+import scheme.claj.client.dialogs.CreateClajRoomDialog;
+import scheme.claj.client.dialogs.JoinViaClajDialog;
+
 import static arc.Core.*;
 import static mindustry.Vars.*;
 import static scheme.SchemeVars.*;
 
 public class Main extends Mod {
+
+    private static String version; // добавлено из Claj Main
 
     public Main() {
         // well, after the 136th build, it became much easier
@@ -38,6 +45,7 @@ public class Main extends Mod {
 
     @Override
     public void init() {
+        // Инициализация Scheme
         ServerIntegration.load();
         ModedGlyphLayout.load();
         SchemeVars.load();
@@ -46,13 +54,13 @@ public class Main extends Mod {
         MessageQueue.load();
         RainbowTeam.load();
 
-        ui.schematics = schemas; // do it before build hudfrag
+        ui.schematics = schemas;
         ui.listfrag = listfrag;
 
         units.load();
         builds.load();
 
-        m_settings.apply(); // sometimes settings are not self-applying
+        m_settings.apply();
 
         hudfrag.build(ui.hudGroup);
         listfrag.build(ui.hudGroup);
@@ -66,19 +74,21 @@ public class Main extends Mod {
         if (settings.getBool("welcome")) ui.showOkText("@welcome.name", "@welcome.text", () -> {});
         if (settings.getBool("check4update")) SchemeUpdater.check();
 
-        if (SchemeUpdater.installed("miner-tools")) { // very sad but they are incompatible
+        if (SchemeUpdater.installed("miner-tools")) {
             ui.showOkText("@incompatible.name", "@incompatible.text", () -> {});
-            ui.hudGroup.fill(cont -> { // crutch to prevent crash
+            ui.hudGroup.fill(cont -> {
                 cont.visible = false;
                 cont.add(new CoreItemsDisplay());
             });
         }
 
-        try { // run main.js without the wrapper to access the constant values in the game console
+        try {
             Scripts scripts = mods.getScripts();
             scripts.context.evaluateReader(scripts.scope, SchemeUpdater.script().reader(), "main.js", 0);
             log("Added constant variables to developer console.");
-        } catch (Throwable e) { error(e); }
+        } catch (Throwable e) {
+            error(e);
+        }
 
         Blocks.distributor.buildType = () -> ((Router) Blocks.distributor).new RouterBuild() {
             @Override
@@ -109,8 +119,18 @@ public class Main extends Mod {
                 });
             }
         });
+
+        // === ИНИЦИАЛИЗАЦИЯ Claj ===
+        try {
+            new JoinViaClajDialog();
+            new CreateClajRoomDialog();
+            log("Claj dialogs initialized.");
+        } catch (Throwable e) {
+            error(new RuntimeException("Failed to initialize Claj dialogs", e));
+        }
     }
 
+    // ==== Методы Scheme ====
     public static void log(String info) {
         app.post(() -> Log.infoTag("Scheme", info));
     }
@@ -121,7 +141,6 @@ public class Main extends Mod {
 
     public static void copy(String text) {
         if (text == null) return;
-
         app.setClipboardText(text);
         ui.showInfoFade("@copied");
     }

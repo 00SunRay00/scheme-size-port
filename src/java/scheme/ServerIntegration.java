@@ -55,8 +55,6 @@ public class ServerIntegration {
         Events.run(ClientPreConnectEvent.class, ServerIntegration::clear);
 
         netClient.addPacketHandler("SendMeSubtitle", args -> {
-            if (antiModIPs.contains(Reflect.<String>get(ui.join, "lastIp"))) return;
-
             Call.serverPacketReliable("MySubtitle", settings.getString("subtitle"));
             if (args != null) hostID = Strings.parseInt(args, -1);
         });
