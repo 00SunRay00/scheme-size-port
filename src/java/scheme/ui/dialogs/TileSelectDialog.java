@@ -1,22 +1,25 @@
 package scheme.ui.dialogs;
 
-import arc.func.Boolf;
-import arc.func.Cons;
-import arc.func.Cons3;
-import arc.func.Prov;
+import arc.func.*;
 import arc.graphics.g2d.TextureRegion;
 import arc.scene.style.TextureRegionDrawable;
+import arc.scene.ui.ScrollPane;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import mindustry.content.Blocks;
+import mindustry.gen.Building;
 import mindustry.gen.Icon;
 import mindustry.graphics.Pal;
+import mindustry.ui.Styles;
 import mindustry.ui.dialogs.BaseDialog;
 import mindustry.world.Block;
+import mindustry.world.Build;
 import mindustry.world.Tile;
+import mindustry.world.blocks.defense.Wall;
 import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.environment.OverlayFloor;
 import mindustry.world.blocks.environment.Prop;
+import mindustry.world.blocks.power.Battery;
 import scheme.ui.List;
 
 import static arc.Core.*;
@@ -27,7 +30,7 @@ import com.github.bsideup.jabel.Desugar;
 
 public class TileSelectDialog extends BaseDialog {
 
-    public static final int row = mobile ? 8 : 10;
+    public static final int row = mobile ? 8 : 15;
     public static final float size = mobile ? 54f : 64f;
 
     public Table blocks = new Table();
@@ -35,6 +38,7 @@ public class TileSelectDialog extends BaseDialog {
     public Block floor;
     public Block block;
     public Block overlay;
+    public Block building;
     public List<Folder> list;
 
     public TileSelectDialog() {
@@ -44,13 +48,14 @@ public class TileSelectDialog extends BaseDialog {
         Seq<Folder> folders = Seq.with(
                 new Folder("select.floor", () -> floor, b -> b instanceof Floor && !(b instanceof OverlayFloor), b -> floor = b),
                 new Folder("select.block", () -> block, b -> b instanceof Prop, b -> block = b),
-                new Folder("select.overlay", () -> overlay, b -> b instanceof OverlayFloor, b -> overlay = b));
+                new Folder("select.overlay", () -> overlay, b -> b instanceof OverlayFloor, b -> overlay = b),
+                new Folder("select.building", () -> building, b -> b instanceof Block, b -> building = b));
 
         list = new List<>(folders::each, Folder::name, Folder::icon, folder -> Pal.accent);
         list.onChanged = this::rebuild;
         list.set(folders.first());
         list.rebuild();
-        
+
         list.build(cont);
         cont.add(blocks).growX();
         cont.table().width(288f);
@@ -58,23 +63,24 @@ public class TileSelectDialog extends BaseDialog {
 
     public void rebuild(Folder folder) {
         blocks.clear();
-        blocks.table(table -> {
-            table.defaults().size(size);
+        Table inner = new Table();
+        inner.defaults().size(size);
 
-            table.button(Icon.none, () -> folder.callback(null));
-            table.button(Icon.line, () -> folder.callback(Blocks.air));
+        inner.button(Icon.none, () -> folder.callback(null));
+        inner.button(Icon.line, () -> folder.callback(Blocks.air));
 
-            content.blocks().each(folder::pred, block -> {
-                TextureRegionDrawable drawable = new TextureRegionDrawable(block.uiIcon);
-                table.button(drawable, () -> folder.callback(block));
+        content.blocks().each(folder::pred, block -> {
+            TextureRegionDrawable drawable = new TextureRegionDrawable(block.uiIcon);
+            inner.button(drawable, () -> folder.callback(block));
 
-                if (table.getChildren().count(i -> true) % row == 0) table.row();
-            });
+            if (inner.getChildren().size % row == 0) inner.row();
         });
+        ScrollPane pane = new ScrollPane(inner, Styles.defaultPane);
+        blocks.add(pane).grow();
     }
 
-    public void select(Cons3<Floor, Block, Floor> callback) {
-        callback.get(floor != null ? floor.asFloor() : null, block, overlay != null ? overlay.asFloor() : null);
+    public void select(Cons4<Floor, Block, Floor, Block> callback) {
+        callback.get(floor != null ? floor.asFloor() : null, block, overlay != null ? overlay.asFloor() : null, building);
     }
 
     public void select(int x, int y) {
@@ -84,6 +90,7 @@ public class TileSelectDialog extends BaseDialog {
         floor = tile.floor();
         block = tile.build == null ? tile.block() : Blocks.air;
         overlay = tile.overlay();
+        building = tile.build == null ? tile.block() : Blocks.air;
         list.rebuild();
     }
 

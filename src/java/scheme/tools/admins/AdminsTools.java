@@ -17,6 +17,10 @@ public interface AdminsTools {
     public String disabled = bundle.format("admins.notenabled");
     public String unabailable = bundle.format("admins.notavailable");
 
+    public void manageRuleBool(boolean value, String name);
+
+    public void manageRuleStr(String value, String name);
+
     public void manageUnit();
 
     public void spawnUnits();
