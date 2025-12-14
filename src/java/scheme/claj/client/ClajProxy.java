@@ -19,6 +19,7 @@ import arc.util.io.ByteBufferOutput;
 
 import mindustry.Vars;
 import mindustry.gen.Call;
+import scheme.Main;
 
 
 public class ClajProxy extends Client implements NetListener {
@@ -38,8 +39,7 @@ public class ClajProxy extends Client implements NetListener {
   private final arc.net.Server server;
   private final NetListener serverDispatcher;
   private Cons<Long> roomCreated;
-  private Cons<ClajPackets.RoomClosedPacket.CloseReason> roomClosed;
-  private ClajPackets.RoomClosedPacket.CloseReason closeReason;
+  private Runnable roomClosed;
   private long roomId = -1;
   private volatile boolean shutdown;
 
@@ -57,7 +57,7 @@ public class ClajProxy extends Client implements NetListener {
 
   /** This method must be used instead of others connect methods */
   public void connect(String host, int udpTcpPort, Cons<Long> roomCreatedCallback, 
-                      Cons<ClajPackets.RoomClosedPacket.CloseReason> roomClosedCallback) throws java.io.IOException {
+                     Runnable roomClosedCallback) throws java.io.IOException {
     roomCreated = roomCreatedCallback;
     roomClosed = roomClosedCallback;
     connect(defaultTimeout, host, udpTcpPort, udpTcpPort);
@@ -84,7 +84,7 @@ public class ClajProxy extends Client implements NetListener {
       } catch (ArcNetException ex) {
         if (roomId == -1) {
           close();
-          Reflect.set(Connection.class, this, "lastProtocolError", ex);
+          Reflect.set(Client.class, this, "lastProtocolError", ex);
           throw ex;
         }
       }
@@ -106,22 +106,22 @@ public class ClajProxy extends Client implements NetListener {
   
   public void closeRoom() {
     roomId = -1;
-    if (isConnected()) sendTCP(new ClajPackets.RoomClosureRequestPacket());
+    if (isConnected()) sendTCP(new ClajPackets.RoomCloseRequestPacket());
     close();
   }
 
   @Override
   public void connected(Connection connection) {
     // Request the room link
-    ClajPackets.RoomCreationRequestPacket p = new ClajPackets.RoomCreationRequestPacket();
-    p.version = "2.4";
+    ClajPackets.RoomCreateRequestPacket p = new ClajPackets.RoomCreateRequestPacket();
+    p.version = Main.getVersion(); // TODO: find a better way to gets mod version
     sendTCP(p);
   }
 
   @Override
   public void disconnected(Connection connection, DcReason reason) {
     roomId = -1;
-    if (roomClosed != null) roomClosed.get(closeReason);
+    if (roomClosed != null) roomClosed.run();
     // We cannot communicate with the server anymore, so close all virtual connections
     orderedConnections.each(c -> c.closeQuietly(reason));
     connections.clear();
@@ -130,29 +130,18 @@ public class ClajProxy extends Client implements NetListener {
 
   @Override
   public void received(Connection connection, Object object) {
-    if (!(object instanceof ClajPackets.Packet)) {
-      return;
+    if (!(object instanceof ClajPackets.Packet)) return;
 
-    } else if (object instanceof ClajPackets.ClajMessagePacket) {
+    else if (object instanceof ClajPackets.ClajMessagePacket) {
       Call.sendMessage("[scarlet][[CLaJ Server]:[] " + ((ClajPackets.ClajMessagePacket)object).message);
     
-    } else if (object instanceof ClajPackets.ClajMessage2Packet) {
-      Call.sendMessage("[scarlet][[CLaJ Server]:[] " + arc.Core.bundle.get("claj.message." + 
-          arc.util.Strings.camelToKebab(((ClajPackets.ClajMessage2Packet)object).message.name())));
-    
-    } else if (object instanceof ClajPackets.ClajPopupPacket) {
-      Vars.ui.showText("[scarlet][[CLaJ Server][] ", ((ClajPackets.ClajPopupPacket)object).message);
-      
-    } else if (object instanceof ClajPackets.RoomClosedPacket) {
-      closeReason = ((ClajPackets.RoomClosedPacket)object).reason;
-      
     } else if (object instanceof ClajPackets.RoomLinkPacket) {
       // Ignore if the room id is received twice
       if (roomId != -1) return;
       
       roomId = ((ClajPackets.RoomLinkPacket)object).roomId;
       // -1 is not allowed since it's used to specify an uncreated room
-      if (roomId != -1 && roomCreated != null) roomCreated.get(roomId);      
+      if (roomId != -1 && roomCreated != null) roomCreated.get(roomId);
       
     } else if (object instanceof ClajPackets.ConnectionWrapperPacket) {
       // Ignore packets until the room id is received
@@ -162,6 +151,7 @@ public class ClajProxy extends Client implements NetListener {
       VirtualConnection con = connections.get(id);
       
       if (con == null) {
+        
         // Create a new connection
         if (object instanceof ClajPackets.ConnectionJoinPacket) {
           // Check if the link is the right
@@ -234,9 +224,9 @@ public class ClajProxy extends Client implements NetListener {
   }
  
   
-  /** We can safely remove and hook things, the networking has been reverse engineered. */
+  /** We can safely remove things, only {@link #sendTCP(Object)} and {@link #sendUDP(Object)} are useful. */
   public static class VirtualConnection extends Connection {
-    final Seq<NetListener> listeners = new Seq<>();
+	final Seq<NetListener> listeners = new Seq<>();
     final int id;
     /** 
      * A virtual connection is always connected until we closing it, 

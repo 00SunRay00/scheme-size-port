@@ -20,14 +20,11 @@ public class ClajPackets {
     register(ConnectionClosedPacket::new);
     register(ConnectionJoinPacket::new);
     register(ConnectionIdlingPacket::new);
-    register(RoomCreationRequestPacket::new);
-    register(RoomClosureRequestPacket::new);
-    register(RoomClosedPacket::new);
+    register(RoomCreateRequestPacket::new);
+    register(RoomCloseRequestPacket::new);
     register(RoomLinkPacket::new);
     register(RoomJoinPacket::new);
     register(ClajMessagePacket::new);
-    register(ClajMessage2Packet::new);
-    register(ClajPopupPacket::new);
   }
 
   
@@ -90,16 +87,17 @@ public class ClajPackets {
   }
   
   public static class ConnectionClosedPacket extends ConnectionWrapperPacket {
-    private static final DcReason[] reasons = DcReason.values();
+    private static DcReason[] reasons = DcReason.values();
 
     public DcReason reason;
 
     protected void read0(ByteBufferInput read) {
-      reason = reasons[read.readByte()];
+      byte b = read.readByte();
+      reason = b < 0 || b >= reasons.length ? DcReason.error : reasons[b];
     }
 
     protected void write0(ByteBufferOutput write) {
-      write.writeByte(reason.ordinal());
+      write.writeByte((byte)reason.ordinal());
     }
   }
   
@@ -118,7 +116,7 @@ public class ClajPackets {
   public static class ConnectionIdlingPacket extends ConnectionWrapperPacket {
   }
   
-  public static class RoomCreationRequestPacket extends Packet {
+  public static class RoomCreateRequestPacket extends Packet {
     public String version;
     
     public void read(ByteBufferInput read) {
@@ -134,33 +132,7 @@ public class ClajPackets {
     }
   }
   
-  public static class RoomClosureRequestPacket extends Packet {
-  }
-  
-  public static class RoomClosedPacket extends Packet {
-    public static enum CloseReason {
-      /** Closed without reason */
-      closed,
-      /** Incompatible claj client */
-      obsoleteClient, 
-      /** Old claj version */
-      outdatedVersion,
-      /** Server is shutting down */
-      serverClosed;
-      
-      public static final CloseReason[] all = values();
-    }
-    
-    
-    public CloseReason reason;
-    
-    public void read(ByteBufferInput read) {
-      reason = CloseReason.all[read.readByte()]; 
-    }
-    
-    public void write(ByteBufferOutput write) {
-      write.writeByte(reason.ordinal());
-    }
+  public static class RoomCloseRequestPacket extends Packet {
   }
   
   public static class RoomLinkPacket extends Packet {
@@ -190,31 +162,5 @@ public class ClajPackets {
       try { write.writeUTF(message); }
       catch (Exception e) { throw new RuntimeException(e); }
     }
-  }
-  
-  public static class ClajMessage2Packet extends Packet {
-    public static enum MessageType {
-      serverClosing,
-      packetSpamming,
-      alreadyHosting,
-      roomClosureDenied,
-      conClosureDenied;
-      
-      public static final MessageType[] all = values();
-    }
-    
-    
-    public MessageType message;
-    
-    public void read(ByteBufferInput read) {
-      message = MessageType.all[read.readByte()]; 
-    }
-    
-    public void write(ByteBufferOutput write) {
-      write.writeByte(message.ordinal());
-    }
-  }
-  
-  public static class ClajPopupPacket extends ClajMessagePacket {
   }
 }

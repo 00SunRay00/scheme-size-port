@@ -42,7 +42,7 @@ public class Claj {
 
   /** @apiNote async operation */
   public static void createRoom(String ip, int port, Cons<ClajLink> done, Cons<Throwable> failed, 
-                                Cons<ClajPackets.RoomClosedPacket.CloseReason> disconnected) {
+                                Runnable disconnected) {
     if (room == null || roomThread == null || !roomThread.isAlive()) 
       roomThread = Threads.daemon("CLaJ Proxy", room = new ClajProxy());
     

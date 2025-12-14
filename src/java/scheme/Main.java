@@ -7,7 +7,6 @@ import mindustry.content.Blocks;
 import mindustry.game.Schematics;
 import mindustry.gen.Building;
 import mindustry.mod.Mod;
-import mindustry.mod.Mods;
 import mindustry.mod.Scripts;
 import mindustry.type.Item;
 import mindustry.ui.CoreItemsDisplay;
@@ -21,8 +20,6 @@ import scheme.tools.RainbowTeam;
 import scheme.ui.MapResizeFix;
 
 // Добавлены Claj импорты
-import scheme.claj.client.dialogs.CreateClajRoomDialog;
-import scheme.claj.client.dialogs.JoinViaClajDialog;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -144,4 +141,6 @@ public class Main extends Mod {
         app.setClipboardText(text);
         ui.showInfoFade("@copied");
     }
+    /** @return the mod version, using this class, or {@code null} if mod is not loaded yet. */
+    public static String getVersion() {return "2.3.3";}
 }
