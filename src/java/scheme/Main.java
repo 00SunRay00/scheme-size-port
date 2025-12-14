@@ -13,13 +13,12 @@ import mindustry.ui.CoreItemsDisplay;
 import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.Router;
 import mindustry.world.blocks.logic.LogicDisplay;
+import scheme.claj.client.dialogs.*;
 import scheme.moded.ModedGlyphLayout;
 import scheme.moded.ModedSchematics;
 import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
 import scheme.ui.MapResizeFix;
-
-// Добавлены Claj импорты
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -27,7 +26,7 @@ import static scheme.SchemeVars.*;
 
 public class Main extends Mod {
 
-    private static String version; // добавлено из Claj Main
+    private static String version;
 
     public Main() {
         // well, after the 136th build, it became much easier
@@ -117,7 +116,6 @@ public class Main extends Mod {
             }
         });
 
-        // === ИНИЦИАЛИЗАЦИЯ Claj ===
         try {
             new JoinViaClajDialog();
             new CreateClajRoomDialog();
@@ -127,7 +125,6 @@ public class Main extends Mod {
         }
     }
 
-    // ==== Методы Scheme ====
     public static void log(String info) {
         app.post(() -> Log.infoTag("Scheme", info));
     }
