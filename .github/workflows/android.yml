@@ -8,19 +8,26 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    - name: set up JDK 16
+
+    - name: Set up JDK 16
       uses: actions/setup-java@v4
       with:
         java-version: '16'
         distribution: 'temurin'
         cache: gradle
 
+    - name: Install d8 (V8 shell)
+      run: |
+        sudo apt update
+        sudo apt install -y v8
+        d8 --version
+
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
+
     - name: Build with Gradle
       run: ./gradlew deploy
