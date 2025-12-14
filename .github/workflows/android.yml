@@ -20,11 +20,9 @@ jobs:
         distribution: 'temurin'
         cache: gradle
 
-    - name: Install d8 (V8 shell)
-      run: |
-        sudo apt update
-        sudo apt install -y v8
-        d8 --version
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
+
 
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
