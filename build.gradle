@@ -19,7 +19,8 @@ repositories {
 ext {
     mindustryVersion = 'v153'
     jabelVersion = '1.0.1'
-    sdkRoot = System.getenv('ANDROID_HOME') ?: System.getenv('ANDROID_SDK_ROOT')
+    isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
+    sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
 }
 
 allprojects {
