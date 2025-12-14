@@ -234,6 +234,7 @@ public class HudFragment {
                     setAction(mode, "blasted",   () -> admins.despawn());
                     setAction(mode, "overdrive", () -> admins.teleport());
                     setAction(mode, Icon.lock,   () -> m_input.lockMovement());
+                    setAction(mode, Icon.fileText,   () -> rulesetter.show());
                 }).visible(() -> true).update(mode -> mode.setTranslation(0f, Scl.scl(mobiles.fliped ? 0f : -63.2f))).row();
 
                 partitionmb(pad, mode -> {

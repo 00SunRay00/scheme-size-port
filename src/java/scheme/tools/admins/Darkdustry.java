@@ -16,6 +16,18 @@ import static scheme.SchemeVars.*;
 
 public class Darkdustry implements AdminsTools {
 
+    public void manageRuleBool(boolean value, String name) {
+        if (unusable()) return;
+    }
+
+    public void manageRuleStr(String value, String name) {
+        if (unusable()) return;
+    }
+
+    public void manageRuleStr(boolean value, String name) {
+        if (unusable()) return;
+    }
+
     public void manageUnit() {
         if (unusable()) return;
         unit.select(false, true, false, (target, team, unit, amount) -> {
@@ -77,12 +89,12 @@ public class Darkdustry implements AdminsTools {
 
     public void fill(int sx, int sy, int ex, int ey) {
         if (unusable()) return;
-        tile.select((floor, block, overlay) -> sendPacket("fill", id(floor), id(block), id(overlay), sx, sy, ex - sx + 1, ey - sy + 1));
+        //Darkdustry is going fuck itself
     }
 
     public void brush(int x, int y, int radius) {
         if (unusable()) return;
-        tile.select((floor, block, overlay) -> sendPacket("brush", id(floor), id(block), id(overlay), x, y, radius));
+        //Darkdustry is going fuck itself
     }
 
     public void flush(Seq<BuildPlan> plans) {

@@ -3,8 +3,11 @@ package scheme.tools.admins;
 import arc.math.geom.Geometry;
 import arc.math.geom.Position;
 import arc.struct.Seq;
+import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.entities.units.BuildPlan;
+import mindustry.game.Rules;
+import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.world.Block;
@@ -13,11 +16,35 @@ import mindustry.world.blocks.environment.Prop;
 import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
 import scheme.tools.RainbowTeam;
 
+import java.lang.reflect.Field;
+
 import static arc.Core.*;
 import static mindustry.Vars.*;
 import static scheme.SchemeVars.*;
 
 public class Internal implements AdminsTools {
+
+    public void manageRuleBool(boolean value, String name) {
+        try {
+            Field fiel = Rules.class.getField(name);
+            fiel.setBoolean(Vars.state.rules, value);
+
+            Call.setRules(Vars.state.rules);
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    public void manageRuleStr(String value, String name) {
+        try {
+            Field fiel = Rules.class.getField(name);
+            fiel.set(Vars.state.rules, value);
+
+            Call.setRules(Vars.state.rules);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     public void manageUnit() {
         if (unusable()) return;
@@ -88,26 +115,28 @@ public class Internal implements AdminsTools {
 
     public void fill(int sx, int sy, int ex, int ey) {
         if (unusable()) return;
-        tile.select((floor, block, overlay) -> {
+        tile.select((floor, block, overlay, building) -> {
             for (int x = sx; x <= ex; x++)
                 for (int y = sy; y <= ey; y++)
-                    edit(floor, block, overlay, x, y);
+                    edit(floor, block, overlay, building, x, y);
         });
     }
 
     public void brush(int x, int y, int radius) {
         if (unusable()) return;
-        tile.select((floor, block, overlay) -> Geometry.circle(x, y, radius, (cx, cy) -> edit(floor, block, overlay, cx, cy)));
+        tile.select((floor, block, overlay, building) -> Geometry.circle(x, y, radius, (cx, cy) -> edit(floor, block, overlay, building, cx, cy)));
     }
 
     public void flush(Seq<BuildPlan> plans) {
         plans.each(plan -> {
             if (plan.block.isFloor() && !plan.block.isOverlay())
-                edit(plan.block, null, null, plan.x, plan.y);
+                edit(plan.block, null, null, null, plan.x, plan.y);
             else if (plan.block instanceof Prop)
-                edit(null, plan.block, null, plan.x, plan.y);
+                edit(null, plan.block, null, null, plan.x, plan.y);
             else if (plan.block.isOverlay())
-                edit(null, null, plan.block, plan.x, plan.y);
+                edit(null, null, plan.block, null, plan.x, plan.y);
+            else if (plan.block instanceof Block)
+                edit(null, null, null, plan.block, plan.x, plan.y);
         });
     }
 
@@ -120,7 +149,7 @@ public class Internal implements AdminsTools {
         return admin;
     }
 
-    private static void edit(Block floor, Block block, Block overlay, int x, int y) {
+    private static void edit(Block floor, Block block, Block overlay, Block building, int x, int y) {
         Tile tile = world.tile(x, y);
         if (tile == null) return;
 
@@ -128,5 +157,6 @@ public class Internal implements AdminsTools {
             tile.setFloorNet(floor == null ? tile.floor() : floor, overlay == null ? tile.overlay() : overlay);
 
         if (block != null && tile.block() != block) tile.setNet(block);
+        if (building != null && tile.block() != building) tile.setNet(building, player.team(), 0);
     }
 }

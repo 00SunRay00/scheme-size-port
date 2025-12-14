@@ -30,6 +30,7 @@ public class SchemeVars {
     public static ModedSchematics m_schematics;
     public static ModedInputHandler m_input;
 
+    public static RuleSetterDialog rulesetter;
     public static AdminsTools admins;
     public static RendererTools render;
     public static BuildingTools build;
@@ -103,6 +104,7 @@ public class SchemeVars {
         // m_schematics is created in Main to prevent dual loading
         m_input = mobile ? new ModedMobileInput() : new ModedDesktopInput();
 
+        rulesetter = new RuleSetterDialog();
         admins = AdminsConfigDialog.getTools();
         render = new RendererTools();
         build = new BuildingTools();

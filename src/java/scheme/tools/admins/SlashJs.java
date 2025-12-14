@@ -15,8 +15,17 @@ import scheme.tools.RainbowTeam;
 import static arc.Core.*;
 import static mindustry.Vars.*;
 import static scheme.SchemeVars.*;
+import static scheme.tools.MessageQueue.send;
 
 public class SlashJs implements AdminsTools {
+
+    public void manageRuleBool(boolean value, String name) {
+        send("Vars.state.rules." + name + " = " + value + "; Call.setRules(Vars.state.rules);");
+    }
+
+    public void manageRuleStr(String value, String name) {
+        send("Vars.state.rules." + name + " = " + value + "; Call.setRules(Vars.state.rules);");
+    }
 
     public void manageUnit() {
         if (unusable()) return;
@@ -98,16 +107,16 @@ public class SlashJs implements AdminsTools {
 
     public void fill(int sx, int sy, int ex, int ey) {
         if (unusable()) return;
-        tile.select((floor, block, overlay) -> {
-            edit(floor, block, overlay);
+        tile.select((floor, block, overlay, building) -> {
+            edit(floor, block, overlay, building);
             send("for (var x = @; x <= @; x++) for (var y = @; y <= @; y++) todo(Vars.world.tile(x, y))", sx, ex, sy, ey);
         });
     }
 
     public void brush(int x, int y, int radius) {
         if (unusable()) return;
-        tile.select((floor, block, overlay) -> {
-            edit(floor, block, overlay);
+        tile.select((floor, block, overlay, building) -> {
+            edit(floor, block, overlay, building);
             send("Geometry.circle(@, @, @, (cx, cy) => todo(Vars.world.tile(cx, cy)))", x, y, radius);
         });
     }
@@ -150,11 +159,11 @@ public class SlashJs implements AdminsTools {
         return block == null ? "null" : "Vars.content.block(" + block.id + ")";
     }
 
-    private static void edit(Block floor, Block block, Block overlay) {
+    private static void edit(Block floor, Block block, Block overlay, Block building) {
         boolean fo = floor != null || overlay != null;
 
-        send("f = @; b = @; o = @", getBlock(floor), getBlock(block), getBlock(overlay));
-        send("todo = tile => { if(tile!=null){" + (fo ? "sflr(tile);" : "") + (block != null ? "if(tile.block()!=b)tile.setNet(b)" : "") + "} }");
+        send("f = @; b = @; o = @; d = @", getBlock(floor), getBlock(block), getBlock(overlay), getBlock(building));
+        send("todo = tile => { if(tile!=null){" + (fo ? "sflr(tile);" : "") + (block != null ? "if(tile.block()!=b)tile.setNet(b)" : "") + (building != null ? "if(tile.block()!=d)tile.setNet(d, Team." + player.team() + ", 0)" : "") + "} }");
         if (fo) send("sflr = tile => { if(tile.floor()!=f||tile.overlay()!=o)tile.setFloorNet(f==null?tile.floor():f,o==null?tile.overlay():o) }");
     }
 }
