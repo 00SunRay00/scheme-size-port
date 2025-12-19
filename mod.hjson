@@ -4,6 +4,7 @@ subtitle: No longer just increases the schema size,
 description: "
 A mod that increases the schematic size limit to 512 blocks! Adds admins, renderer and building tools. Has an updater, keybinds and AI support.
 [red]This mod is not the original port of Scheme Size — it is a custom port. The developer of the original mod is not involved in this in any way.
+[red]!!!ATTENTION: VERSIONS BELOW v154 ARE NOT SUPPORTED!!!
 [red]Vanilla Only![orange]
 
    - Release!
@@ -26,6 +27,6 @@ A mod that increases the schematic size limit to 512 blocks! Adds admins, render
 ",
 author: "[#0096FF]xzxADIxzx\nPort: 00SunRay00",
 minGameVersion: 154,
-version: 1.0.4,
+version: 1.0.4.1,
 hidden: true,
 main: scheme.Main
