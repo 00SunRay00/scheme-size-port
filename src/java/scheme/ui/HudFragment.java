@@ -40,6 +40,9 @@ import static scheme.ai.GammaAI.Updater.*;
 
 public class HudFragment {
 
+    private static final float mobileButtonSize = 63.5f;
+    private static final float mobileButtonsExpanded = mobileButtonSize * 3f;
+
     /** Just a short reference to a variable with a long name. */
     public static final ImageButtonStyle style = Styles.clearNonei, check = Styles.clearNoneTogglei;
     public static final TextFieldStyle input = new TextFieldStyle() {{
@@ -203,22 +206,35 @@ public class HudFragment {
             }).get().color.a(0f); // hide on startup
         });
 
+        parent.fill(cont -> { // Minimap close button
+            cont.name = "minimapclose";
+            cont.top().left();
+
+            cont.visible(() -> ui.hudfrag.shown && ui.minimapfrag.shown());
+            cont.button(Icon.cancel, style, ui.minimapfrag::toggle).size(mobileButtonSize).margin(4f).padTop(mobile ? 69f : 0f);
+        });
+
         if (!settings.getBool("mobilebuttons") && !mobile) return;
 
         getCommandButton(cont -> { // Shortcut and cursed schematics button
             if (!SchemeUpdater.installed("test-utils")) // hardcoded paddings
                 cont.row(); // for command button
 
-            cont.button("@schematics", Icon.paste, Styles.squareTogglet, () -> {
+            var shortcuts = cont.button("@schematics", Icon.paste, Styles.squareTogglet, () -> {
                 if (shortfrag.visible) shortfrag.hide();
                 else shortfrag.show(graphics.getWidth() - (int) Scl.scl(15f), graphics.getHeight() / 2);
-            }).size(155f, 50f).margin(8f).checked(t -> shortfrag.visible);
+            }).size(155f, 50f).margin(8f).checked(t -> shortfrag.visible).get();
 
             if (!SchemeUpdater.installed("test-utils")) cont.row();
 
-            cont.button("@none", Icon.menu, Styles.flatBordert, () -> {
+            var layers = cont.button("@none", Icon.menu, Styles.flatBordert, () -> {
                 m_schematics.nextLayer();
-            }).size(155f, 50f).margin(6f).update(button -> button.setText(bundle.get("layer." + m_schematics.layer)));
+            }).size(155f, 50f).margin(6f).update(button -> button.setText(bundle.get("layer." + m_schematics.layer))).get();
+
+            if (mobile) {
+                shortcuts.update(() -> shortcuts.setTranslation(0f, Scl.scl(control.input.commandMode ? 56f : 0f)));
+                layers.update(() -> layers.setTranslation(0f, Scl.scl(control.input.commandMode ? 56f : 0f)));
+            }
         });
 
         parent.fill(cont -> { // Mobile Buttons
@@ -235,7 +251,7 @@ public class HudFragment {
                     setAction(mode, "overdrive", () -> admins.teleport());
                     setAction(mode, Icon.lock,   () -> m_input.lockMovement());
                     setAction(mode, Icon.fileText,   () -> rulesetter.show());
-                }).visible(() -> true).update(mode -> mode.setTranslation(0f, Scl.scl(mobiles.fliped ? 0f : -63.2f))).row();
+                }).visible(() -> true).update(mode -> mode.setTranslation(0f, Scl.scl(mobiles.fliped ? 0f : -mobileButtonSize))).row();
 
                 partitionmb(pad, mode -> {
                     setAction(mode, Icon.effect, () -> admins.placeCore());
@@ -253,13 +269,14 @@ public class HudFragment {
                 }).row();
             }).margin(0f).update(pad -> {
                 if (block[1] == null) return; // waves main are not null but block is
-                pad.setTranslation(0f, Scl.scl((mobiles.fliped ? 0f : 127f) - (mobile ? 69f : 0f)) - block[state.rules.editor ? 2 : 1].getHeight());
-                pad.setHeight(Scl.scl(mobiles.fliped ? 190.8f : 63.8f));
+                float height = mobiles.fliped ? mobileButtonsExpanded : mobileButtonSize;
+                pad.setTranslation(0f, Scl.scl((mobiles.fliped ? 0f : mobileButtonsExpanded - mobileButtonSize) - (mobile ? 69f : 0f)) - block[state.rules.editor ? 2 : 1].getHeight());
+                pad.setHeight(Scl.scl(height));
             });
         });
 
         Table info = getInfoTable();
-        info.update(() -> info.setTranslation(0f, -Scl.scl(mobiles.fliped ? 190.5f : 63.5f)));
+        info.update(() -> info.setTranslation(0f, -Scl.scl(mobiles.fliped ? mobileButtonsExpanded : mobileButtonSize)));
     }
 
     private Cell<Table> partitionbt(Table table, Cons<Table> cons) {
@@ -272,7 +289,7 @@ public class HudFragment {
 
     private Cell<Table> partitionmb(Table table, Cons<Table> cons) {
         return table.table(cont -> {
-            cont.defaults().size(63.5f).left();
+            cont.defaults().size(mobileButtonSize).left();
             cons.get(cont);
         }).visible(() -> mobiles.fliped);
     }
