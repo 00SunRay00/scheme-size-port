@@ -177,9 +177,7 @@ public class ModedSchematics extends Schematics {
 
         for(Schematic.Stile t : schem.tiles){
             BuildPlan plan = new BuildPlan(t.x + dx, t.y + dy, t.rotation, t.block, t.config);
-            // в старой версии BuildPlan просто нет метода setOriginal и нет полей originalX и т.д.
-            // если нужно сохранить оригинальные координаты, придётся делать это отдельно (в отдельной структуре или где-то ещё)
-            if(t.block.unlockedNow()){ // фильтруем по доступности
+            if(t.block.unlockedNow()){
                 plans.add(plan);
             }
         }

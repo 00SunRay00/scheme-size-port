@@ -13,6 +13,7 @@ import mindustry.gen.Player;
 import mindustry.world.Block;
 import mindustry.world.Tile;
 import mindustry.world.blocks.environment.Prop;
+import mindustry.world.blocks.environment.StaticWall;
 import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
 import scheme.tools.RainbowTeam;
 
@@ -73,6 +74,7 @@ public class Internal implements AdminsTools {
     public void manageEffect() {
         if (unusable()) return;
         effect.select(true, true, false, (target, team, effect, amount) -> {
+        if(target.unit() == null) return;
             if (amount == 0f) target.unit().unapply(effect);
             else target.unit().apply(effect, amount);
         });
@@ -105,11 +107,13 @@ public class Internal implements AdminsTools {
 
     public void despawn(Player target) {
         if (unusable()) return;
+        if(target.unit() == null) return;
         target.unit().spawnedByCore(true);
         target.clearUnit();
     }
 
     public void teleport(Position pos) {
+        if(player.unit() == null) return;
         player.unit().set(pos); // it's always available
     }
 
@@ -131,7 +135,7 @@ public class Internal implements AdminsTools {
         plans.each(plan -> {
             if (plan.block.isFloor() && !plan.block.isOverlay())
                 edit(plan.block, null, null, null, plan.x, plan.y);
-            else if (plan.block instanceof Prop)
+            else if (plan.block instanceof Prop || plan.block instanceof StaticWall)
                 edit(null, plan.block, null, null, plan.x, plan.y);
             else if (plan.block.isOverlay())
                 edit(null, null, plan.block, null, plan.x, plan.y);
