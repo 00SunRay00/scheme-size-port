@@ -1,6 +1,7 @@
 .gradle/*
 .settings/*
 .vscode/*
+.idea/*
 
 bin/*
 lib/*
