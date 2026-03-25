@@ -17,6 +17,7 @@ import mindustry.graphics.Pal;
 import mindustry.world.blocks.defense.turrets.BaseTurret.BaseTurretBuild;
 import mindustry.world.blocks.power.ImpactReactor;
 import mindustry.world.blocks.power.NuclearReactor;
+import mindustry.gen.Builderc;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -107,7 +108,7 @@ public class RendererTools {
     public void drawPlans(Unit unit, boolean valid) {
         if (unit == null || unit.plans == null) return;
 
-        Draw.draw(Layer.plans, valid ? unit::drawBuildPlans : () -> {
+        Draw.draw(Layer.plans, valid ? ((Builderc) unit)::drawBuilding : () -> {
             unit.plans.each(plan -> {
                 if (plan == null || plan.block == null) return;
                 plan.animScale = 1f;
