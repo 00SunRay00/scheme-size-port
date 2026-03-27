@@ -14,6 +14,7 @@ import arc.struct.Seq;
 import arc.util.Scaling;
 import arc.util.Strings;
 import arc.util.Structs;
+import mindustry.core.Version;
 import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
@@ -39,7 +40,10 @@ public class PlayerListFragment extends mindustry.ui.fragments.PlayerListFragmen
     @Override
     public void build(Group parent) {
         super.build(parent);
-        ui.hudGroup.getChildren().remove(11);
+        // Vanilla HUD child order changed in v156; removing index 11 corrupts layout and breaks fullscreen map/minimap.
+        if (Version.build > 0 && Version.build < 156 && ui.hudGroup.getChildren().size > 11) {
+            ui.hudGroup.getChildren().remove(11);
+        }
 
         search = getSearch();
         Table pane = getPane(), menu = getMenu();
@@ -63,7 +67,7 @@ public class PlayerListFragment extends mindustry.ui.fragments.PlayerListFragmen
         Groups.player.copy(players);
 
         players.sort(Structs.comps(Structs.comparing(Player::team), Structs.comparingBool(p -> !p.admin)));
-        if (search.getText().length() > 0) players.removeAll(p -> !Strings.stripColors(p.name().toLowerCase()).contains(search.getText().toLowerCase()));
+        if (!search.getText().isEmpty()) players.removeAll(p -> !Strings.stripColors(p.name().toLowerCase()).contains(search.getText().toLowerCase()));
 
         if (players.isEmpty()) content.add("@players.notfound").padBottom(6f).width(350f).maxHeight(h + 14);
         else for (Player user : players) {

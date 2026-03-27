@@ -4,17 +4,12 @@ import arc.scene.ui.*;
 import arc.scene.ui.layout.Table;
 import mindustry.Vars;
 import mindustry.game.Rules;
-import mindustry.gen.Call;
 import mindustry.ui.Styles;
 import mindustry.ui.dialogs.BaseDialog;
-import scheme.SchemeVars;
 
 import java.lang.reflect.Field;
 
-import static arc.Core.settings;
 import static scheme.SchemeVars.admins;
-import static scheme.tools.MessageQueue.send;
-import static scheme.ui.dialogs.AdminsConfigDialog.getTools;
 
 public class RuleSetterDialog extends BaseDialog {
 

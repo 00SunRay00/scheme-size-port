@@ -1,6 +1,6 @@
-name: scheme-size,
-displayName: Scheme Size Port,
-subtitle: No longer just increases the schema size,
+name: scheme-size
+displayName: "Scheme Size Port"
+subtitle: "No longer just increases the schema size"
 description: "
 A mod that increases the schematic size limit to 512 blocks! Adds admins, renderer and building tools. Has an updater, keybinds and AI support.
 [red]This mod is not the original port of Scheme Size — it is a custom port. The developer of the original mod is not involved in this in any way.
@@ -24,9 +24,12 @@ A mod that increases the schematic size limit to 512 blocks! Adds admins, render
    - Advanced Dev Console
    - Copy Link and Join
    - Rule setter
-",
-author: "[#0096FF]xzxADIxzx\nPort: 00SunRay00",
-minGameVersion: 154,
-version: 1.0.5,
-hidden: true,
+"
+author: '''
+[#0096FF]xzxADIxzx
+Port: 00SunRay00
+'''
+minGameVersion: 156
+version: 1.0.5
+hidden: true
 main: scheme.Main

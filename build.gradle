@@ -1,32 +1,40 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+}
 
-version '1.0'
+version = '1.0'
 
-targetCompatibility = 8
-sourceCompatibility = JavaVersion.VERSION_20
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_28
+}
 
-sourceSets.main {
-    java.srcDirs = ['src/java']
-    resources.srcDirs = ['src/resources']
+base {
+    archivesName = project.name
+}
+
+sourceSets {
+    main {
+        java.srcDirs = ['src/java']
+        resources.srcDirs = ['src/resources']
+    }
 }
 
 repositories {
     mavenCentral()
-    maven{ url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
-    maven { url 'https://www.jitpack.io' }
+    maven { url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
+    maven { url "https://jitpack.io" }
 }
 
 ext {
-    mindustryVersion = 'v155'
+    mindustryVersion = 'v156.1'
     jabelVersion = '1.0.1'
     isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
     sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
 }
 
-allprojects {
-    tasks.withType(JavaCompile) {
-        options.compilerArgs.addAll(['--release', '8'])
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.addAll(['--release', '8'])
 }
 
 dependencies {
@@ -37,8 +45,9 @@ dependencies {
     annotationProcessor "com.github.bsideup:jabel:$jabelVersion"
 }
 
-jar {
-    archiveFileName = "${project.archivesBaseName}Desktop.jar"
+tasks.jar {
+    archiveFileName = "${base.archivesName.get()}Desktop.jar"
+
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
@@ -48,38 +57,50 @@ jar {
     }
 }
 
-task jarAndroid{
-    dependsOn "jar"
+tasks.register("jarAndroid") {
+    dependsOn tasks.jar
 
-    doLast{
-        if(!sdkRoot || !new File(sdkRoot).exists()) throw new GradleException("No valid Android SDK found. Ensure that ANDROID_HOME is set to your Android SDK directory.")
+    doLast {
+        if (!sdkRoot || !new File(sdkRoot).exists())
+            throw new GradleException("No valid Android SDK found.")
 
-        def platformRoot = new File("$sdkRoot/platforms/").listFiles().sort().reverse().find{ f -> new File(f, "android.jar").exists() }
+        def platformRoot = new File("$sdkRoot/platforms/")
+                .listFiles()
+                .sort()
+                .reverse()
+                .find { f -> new File(f, "android.jar").exists() }
 
-        if(!platformRoot) throw new GradleException("No android.jar found. Ensure that you have an Android platform installed.")
+        if (!platformRoot)
+            throw new GradleException("No android.jar found.")
 
-        //collect dependencies needed for desugaring
-        def dependencies = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect{ "--classpath $it.path" }.join(" ")
+        def dependencies = (
+                configurations.compileClasspath.asList() +
+                        configurations.runtimeClasspath.asList() +
+                        [new File(platformRoot, "android.jar")]
+        ).collect { "--classpath $it.path" }.join(" ")
 
         def d8 = isWindows ? "d8.bat" : "d8"
 
-        //dex and desugar files - this requires d8 in your PATH
-        "$d8 $dependencies --min-api 14 --output ${project.name}Android.jar ${project.name}Desktop.jar"
-            .execute(null, new File("build/libs")).waitForProcessOutput(System.out, System.err)
+        "$d8 $dependencies --min-api 14 --output ${base.archivesName.get()}Android.jar ${base.archivesName.get()}Desktop.jar"
+                .execute(null, new File("build/libs"))
+                .waitForProcessOutput(System.out, System.err)
     }
 }
 
-task deploy(type: Jar) {
-    dependsOn jarAndroid
-    dependsOn jar
-    archiveFileName = "${project.archivesBaseName}.jar"
+tasks.register("deploy", Jar) {
+    dependsOn "jarAndroid", "jar"
 
-    from { [zipTree("$buildDir/libs/${project.archivesBaseName}Desktop.jar"), zipTree("$buildDir/libs/${project.archivesBaseName}Android.jar")] }
+    archiveFileName = "${base.archivesName.get()}.jar"
+
+    from {
+        [
+                zipTree("$buildDir/libs/${base.archivesName.get()}Desktop.jar"),
+                zipTree("$buildDir/libs/${base.archivesName.get()}Android.jar")
+        ]
+    }
 
     doLast {
-        delete {
-            delete "$buildDir/libs/${project.archivesBaseName}Desktop.jar"
-            delete "$buildDir/libs/${project.archivesBaseName}Android.jar"
-        }
+        delete "$buildDir/libs/${base.archivesName.get()}Desktop.jar"
+        delete "$buildDir/libs/${base.archivesName.get()}Android.jar"
     }
 }

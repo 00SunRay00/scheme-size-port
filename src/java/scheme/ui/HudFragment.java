@@ -60,6 +60,7 @@ public class HudFragment {
     public void build(Group parent) {
         Events.run(WorldLoadEvent.class, this::updateBlocks);
         Events.run(UnlockEvent.class, this::updateBlocks);
+        Events.run(UnlockEvent.class, this::updateBlocks);
         Events.run(ResizeEvent.class, () -> Time.run(10f, () -> { // idk why, but after resizing shortcut appears in the center of the screen
             if (shortfrag.visible) shortfrag.show(graphics.getWidth() - (int) Scl.scl(15f), graphics.getHeight() / 2);
         }));
@@ -78,9 +79,7 @@ public class HudFragment {
             cont.visible(() -> ui.hudfrag.shown && !ui.minimapfrag.shown() && !state.isEditor());
 
             float dif = Scl.scl() % .5f == 0 ? 0f : 1f; // there are also a lot of magic numbers
-            cont.add(new HexBar(() -> units.shield() / units.maxShield, icon -> {
-                icon.image(player::icon).scaling(Scaling.bounded).grow().maxWidth(54f);
-            })).size(92.2f + dif / 2, 80f).padLeft(18.2f - dif).padTop(mobile ? 69f : 0f);
+            cont.add(new HexBar(() -> units.shield() / units.maxShield, icon -> icon.image(player::icon).scaling(Scaling.bounded).grow().maxWidth(54f))).size(92.2f + dif / 2, 80f).padLeft(18.2f - dif).padTop(mobile ? 69f : 0f);
         });
 
         parent.fill(cont -> { // Gamma UI
@@ -117,21 +116,19 @@ public class HudFragment {
             cont.visible(() -> ui.hudfrag.shown && !ui.minimapfrag.shown() && ai.ai instanceof NetMinerAI);
 
             cont.table(Tex.pane, pad -> {
-                pad.table(mode -> {
-                    Events.run(UnitChangeEvent.class, () -> {
-                        mode.clear();
-                        mode.button(Icon.line, check, () -> NetMinerAI.priorityItem = null).checked(t -> NetMinerAI.priorityItem == null).size(37.5f);
+                pad.table(mode -> Events.run(UnitChangeEvent.class, () -> {
+                    mode.clear();
+                    mode.button(Icon.line, check, () -> NetMinerAI.priorityItem = null).checked(t -> NetMinerAI.priorityItem == null).size(37.5f);
 
-                        Unit unit = player.unit();
-                        if (unit != null) {
-                            content.items().each(item -> item.hardness <= unit.type.mineTier && indexer.hasOre(item), item -> {
-                                setItem(mode, item);
-                                if (mode.getChildren().size % 4 == 0) mode.row();
-                            });
-                        }
+                    Unit unit = player.unit();
+                    if (unit != null) {
+                        content.items().each(item -> item.hardness <= unit.type.mineTier && indexer.hasOre(item), item -> {
+                            setItem(mode, item);
+                            if (mode.getChildren().size % 4 == 0) mode.row();
+                        });
+                    }
 
-                    });
-                }).left().row();
+                })).left().row();
                 pad.labelWrap(GammaAI.tooltip).labelAlign(2, 8).pad(8f, 0f, 8f, 0f).width(150f).get().getStyle().fontColor = Color.lightGray;
             }).width(150f).margin(0f).update(pad -> pad.setTranslation(0f, settings.getBool("minimap") ? -Scl.scl(mobile ? 272f : 188f) : 0f)).row();
         });
@@ -191,9 +188,7 @@ public class HudFragment {
             cont.bottom();
 
             cont.table(Styles.black6, pad -> {
-                pad.add("@approaching.info").labelAlign(Align.center, Align.center).update(label -> {
-                    label.setColor(Color.white.cpy().lerp(Color.scarlet, Mathf.absin(10f, 1f)));
-                }).padRight(6f);
+                pad.add("@approaching.info").labelAlign(Align.center, Align.center).update(label -> label.setColor(Color.white.cpy().lerp(Color.scarlet, Mathf.absin(10f, 1f)))).padRight(6f);
                 pad.button(Icon.info, style, approaching::show).grow();
                 pad.button(Icon.eyeOffSmall, style, () -> settings.put("approachenabled", false)).grow();
             }).margin(6f).padBottom(mobile ? 350f : 100f).update(pad -> {
@@ -218,9 +213,7 @@ public class HudFragment {
 
             if (!SchemeUpdater.installed("test-utils")) cont.row();
 
-            cont.button("@none", Icon.menu, Styles.flatBordert, () -> {
-                        m_schematics.nextLayer();
-                    }).size(155f, 50f).margin(6f)
+            cont.button("@none", Icon.menu, Styles.flatBordert, () -> m_schematics.nextLayer()).size(155f, 50f).margin(6f)
                     .visible(() -> !Vars.mobile || !control.input.isPlacing())
                     .update(button -> button.setText(bundle.get("layer." + m_schematics.layer)));
         });
@@ -235,24 +228,24 @@ public class HudFragment {
                 partitionmb(pad, mode -> {
                     mode.add(mobiles);
                     if (mobile) setAction(mode, "disarmed", m_input::lockShooting);
-                    setAction(mode, "blasted",   () -> admins.despawn());
+                    setAction(mode, "blasted", () -> admins.despawn());
                     setAction(mode, "overdrive", () -> admins.teleport());
-                    setAction(mode, Icon.lock,   () -> m_input.lockMovement());
-                    setAction(mode, Icon.fileText,   () -> rulesetter.show());
+                    setAction(mode, Icon.lock, () -> m_input.lockMovement());
+                    setAction(mode, Icon.fileText, () -> rulesetter.show());
                 }).visible(() -> true).update(mode -> mode.setTranslation(0f, Scl.scl(mobiles.fliped ? 0f : -63.2f))).row();
 
                 partitionmb(pad, mode -> {
                     setAction(mode, Icon.effect, () -> admins.placeCore());
-                    setAction(mode, "boss",      () -> admins.manageTeam());
-                    setAction(mode, Icon.logic,  () -> ai.select());
-                    setAction(mode, Icon.admin,  () -> adminscfg.show());
-                    setAction(mode, Icon.image,  () -> rendercfg.show());
+                    setAction(mode, "boss", () -> admins.manageTeam());
+                    setAction(mode, Icon.logic, () -> ai.select());
+                    setAction(mode, Icon.admin, () -> adminscfg.show());
+                    setAction(mode, Icon.image, () -> rendercfg.show());
                 }).row();
 
                 partitionmb(pad, mode -> {
-                    setAction(mode, Icon.units,  () -> admins.manageUnit());
-                    setAction(mode, Icon.add,    () -> admins.spawnUnits());
-                    setAction(mode, "corroded",  () -> admins.manageEffect());
+                    setAction(mode, Icon.units, () -> admins.manageUnit());
+                    setAction(mode, Icon.add, () -> admins.spawnUnits());
+                    setAction(mode, "corroded", () -> admins.manageEffect());
                     setAction(mode, Icon.production, () -> admins.manageItem());
                 }).row();
             }).margin(0f).update(pad -> {
@@ -261,28 +254,7 @@ public class HudFragment {
                 pad.setHeight(Scl.scl(mobiles.fliped ? 190.8f : 63.8f));
             });
         });
-        parent.fill(cont -> { // Minimap title
-            cont.name = "scheme-minimap-title";
-            cont.top();
-            cont.touchable = Touchable.disabled;
-            cont.visible(() -> ui.minimapfrag.shown());
-
-            cont.label(() -> bundle.get("minimap")).style(Styles.outlineLabel).padTop(16f);
-        });
-
-        parent.fill(cont -> { // Minimap back button
-            cont.name = "scheme-minimap-back";
-            cont.bottom();
-            cont.visible(() -> ui.minimapfrag.shown());
-
-            cont.button("@back", Icon.left, Styles.defaultt, ui.minimapfrag::toggle)
-                    .size(220f, 64f)
-                    .padBottom(16f);
-        });
-        Table info = getInfoTable();
-        info.update(() -> info.setTranslation(0f, -Scl.scl(mobiles.fliped ? 190.5f : 63.5f)));
     }
-
     private Cell<Table> partitionbt(Table table, Cons<Table> cons) {
         if (table.hasChildren()) table.image().color(Pal.gray).fillY().width(4f).pad(4f).visible(() -> building.fliped);
         return table.table(cont -> {
@@ -299,9 +271,7 @@ public class HudFragment {
     }
 
     private void setMode(Table table, Drawable icon, Mode mode) {
-        table.button(icon, check, () -> build.setMode(mode)).checked(t -> build.mode == mode).with(button -> {
-            button.addListener(new TooltipLocker("@tooltip." + mode));
-        }).row();
+        table.button(icon, check, () -> build.setMode(mode)).checked(t -> build.mode == mode).with(button -> button.addListener(new TooltipLocker("@tooltip." + mode))).row();
     }
 
     private void setAction(Table table, Object icon, Runnable listener) {

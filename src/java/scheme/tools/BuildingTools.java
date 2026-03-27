@@ -110,9 +110,7 @@ public class BuildingTools {
     public void connect(int x, int y, Cons2<Integer, Integer> callback) {
         if (block() == null) return;
 
-        Building power = Units.closestBuilding(player.team(), x * tilesize, y * tilesize, 999999f, build -> {
-            return build.power != null && ((build.tileX() < x - size || build.tileX() > x + size) || (build.tileY() < y - size || build.tileY() > y + size));
-        }); // search for a power build that is not in the zone
+        Building power = Units.closestBuilding(player.team(), x * tilesize, y * tilesize, 999999f, build -> build.power != null && ((build.tileX() < x - size || build.tileX() > x + size) || (build.tileY() < y - size || build.tileY() > y + size))); // search for a power build that is not in the zone
 
         if (power == null) return;
         int px = power.tileX(), py = power.tileY();

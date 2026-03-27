@@ -43,7 +43,6 @@ public class Main extends Mod {
     public void init() {
         // Инициализация Scheme
         ServerIntegration.load();
-        ModedGlyphLayout.load();
         SchemeVars.load();
         SchemeUpdater.load();
         MapResizeFix.load();
@@ -110,9 +109,7 @@ public class Main extends Mod {
             @Override
             public void draw() {
                 super.draw();
-                if (render.borderless) Draw.draw(Draw.z(), () -> {
-                    Draw.rect(Draw.wrap(buffer.getTexture()), x, y, block.region.width * Draw.scl, -block.region.height * Draw.scl);
-                });
+                if (render.borderless) Draw.draw(Draw.z(), () -> Draw.rect(Draw.wrap(buffer.getTexture()), x, y, block.region.width * Draw.scl, -block.region.height * Draw.scl));
             }
         });
 

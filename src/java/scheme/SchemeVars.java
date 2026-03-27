@@ -3,11 +3,9 @@ package scheme;
 import arc.Events;
 import arc.graphics.Color;
 import arc.graphics.Texture;
-import arc.graphics.Texture.TextureFilter;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.TextureRegion;
 import arc.graphics.gl.FrameBuffer;
-import arc.struct.Seq;
 import arc.util.Log;
 import mindustry.content.StatusEffects;
 import mindustry.core.UI;
@@ -119,15 +117,9 @@ public class SchemeVars {
         tile = new TileSelectDialog();
         tag = new TagSelectDialog();
 
-        unit = new ContentSelectDialog<>("@select.unit", content.units(), 0, 100, 1, value -> {
-            return value == 0 ? "@select.unit.clear" : bundle.format("select.units", value);
-        });
-        effect = new ContentSelectDialog<>("@select.effect", content.statusEffects(), 0, 500 * 3600, 60, value -> {
-            return value == 0 ? "@select.effect.clear" : bundle.format("select.seconds", value / 60f);
-        });
-        item = new ContentSelectDialog<>("@select.item", content.items(), -1000000, 1000000, 500, value -> {
-            return value == 0 ? "@select.item.clear" : bundle.format("select.items", UI.formatAmount(value.longValue()));
-        });
+        unit = new ContentSelectDialog<>("@select.unit", content.units(), 0, 100, 1, value -> value == 0 ? "@select.unit.clear" : bundle.format("select.units", value));
+        effect = new ContentSelectDialog<>("@select.effect", content.statusEffects(), 0, 500 * 3600, 60, value -> value == 0 ? "@select.effect.clear" : bundle.format("select.seconds", value / 60f));
+        item = new ContentSelectDialog<>("@select.item", content.items(), -1000000, 1000000, 500, value -> value == 0 ? "@select.item.clear" : bundle.format("select.items", UI.formatAmount(value.longValue())));
 
         m_settings = new SettingsMenuDialog();
         schemas = new SchemasDialog();

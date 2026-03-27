@@ -92,7 +92,7 @@ public class AISelectDialog extends ListDialog {
         ((GammaAI) ai).cache();
     }
 
-    public class UnitAI {
+    public static class UnitAI {
         public final UnitType type;
         public final AIController ai;
 

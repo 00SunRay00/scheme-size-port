@@ -7,19 +7,15 @@ import arc.scene.ui.ScrollPane;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import mindustry.content.Blocks;
-import mindustry.gen.Building;
 import mindustry.gen.Icon;
 import mindustry.graphics.Pal;
 import mindustry.ui.Styles;
 import mindustry.ui.dialogs.BaseDialog;
 import mindustry.world.Block;
-import mindustry.world.Build;
 import mindustry.world.Tile;
-import mindustry.world.blocks.defense.Wall;
 import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.environment.OverlayFloor;
 import mindustry.world.blocks.environment.Prop;
-import mindustry.world.blocks.power.Battery;
 import scheme.ui.List;
 
 import static arc.Core.*;
@@ -94,7 +90,7 @@ public class TileSelectDialog extends BaseDialog {
         list.rebuild();
     }
 
-    public class Folder {
+    public static class Folder {
         public final String name;
         public final Prov<Block> block;
         public final Boolf<Block> pred;

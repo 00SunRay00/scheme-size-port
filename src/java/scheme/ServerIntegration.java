@@ -2,7 +2,6 @@ package scheme;
 
 import arc.Events;
 import arc.struct.IntMap;
-import arc.util.Reflect;
 import arc.util.Strings;
 import mindustry.game.EventType.*;
 import mindustry.gen.Call;
@@ -10,7 +9,6 @@ import mindustry.io.JsonIO;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
-import static scheme.SchemeVars.*;
 
 /**
  * Package manager for getting player data from the server.

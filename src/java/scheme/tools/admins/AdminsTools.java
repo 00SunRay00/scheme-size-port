@@ -14,61 +14,61 @@ import static mindustry.Vars.*;
 
 public interface AdminsTools {
 
-    public String disabled = bundle.format("admins.notenabled");
-    public String unabailable = bundle.format("admins.notavailable");
+    String disabled = bundle.format("admins.notenabled");
+    String unabailable = bundle.format("admins.notavailable");
 
-    public void manageRuleBool(boolean value, String name);
+    void manageRuleBool(boolean value, String name);
 
-    public void manageRuleStr(String value, String name);
+    void manageRuleStr(String value, String name);
 
-    public void manageUnit();
+    void manageUnit();
 
-    public void spawnUnits();
+    void spawnUnits();
 
-    public void manageEffect();
+    void manageEffect();
 
-    public void manageItem();
+    void manageItem();
 
-    public void manageTeam();
+    void manageTeam();
 
-    public void placeCore();
+    void placeCore();
 
-    public void despawn(Player target);
+    void despawn(Player target);
 
-    public default void despawn() {
+    default void despawn() {
         despawn(player);
     }
 
-    public void teleport(Position pos);
+    void teleport(Position pos);
 
-    public default void teleport() {
+    default void teleport() {
         teleport(camera.position);
     }
 
-    public default void look() {
+    default void look() {
         for (int i = 0; i < 10; i++) player.unit().lookAt(input.mouseWorld());
     }
 
-    public void fill(int sx, int sy, int ex, int ey);
+    void fill(int sx, int sy, int ex, int ey);
 
-    public void brush(int x, int y, int radius);
+    void brush(int x, int y, int radius);
 
-    public void flush(Seq<BuildPlan> plans);
+    void flush(Seq<BuildPlan> plans);
 
-    public boolean unusable();
+    boolean unusable();
 
-    public default int fixAmount(Item item, Float amount) {
+    default int fixAmount(Item item, Float amount) {
         int items = player.core().items.get(item);
         return amount == 0f || items + amount < 0 ? -items : amount.intValue();
     }
 
-    public default boolean canCreate(Team team, UnitType type) {
+    default boolean canCreate(Team team, UnitType type) {
         boolean can = Units.canCreate(team, type);
         if (!can) ui.showInfoFade("@admins.nounit");
         return can;
     }
 
-    public default boolean hasCore(Team team) {
+    default boolean hasCore(Team team) {
         boolean has = team.core() != null;
         if (!has) ui.showInfoFade("@admins.nocore");
         return has;

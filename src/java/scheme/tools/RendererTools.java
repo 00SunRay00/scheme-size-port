@@ -107,13 +107,11 @@ public class RendererTools {
     public void drawPlans(Unit unit, boolean valid) {
         if (unit == null || unit.plans == null) return;
 
-        Draw.draw(Layer.plans, valid ? unit::drawBuildPlans : () -> {
-            unit.plans.each(plan -> {
-                if (plan == null || plan.block == null) return;
-                plan.animScale = 1f;
-                plan.block.drawPlan(plan, unit.plans, valid);
-            });
-        });
+        Draw.draw(Layer.plans, valid ? unit::buildPlan : () -> unit.plans.each(plan -> {
+            if (plan == null || plan.block == null) return;
+            plan.animScale = 1f;
+            plan.block.drawPlan(plan, unit.plans, valid);
+        }));
     }
 
 

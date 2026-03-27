@@ -31,9 +31,7 @@ public class AdminsConfigDialog extends BaseDialog {
             admins = getTools();
         });
 
-        new TextSlider(0, 1, 1, enabled ? 1 : 0, value -> {
-            return bundle.format("admins.lever", bundle.get((enabled = value == 1) ? "admins.enabled" : "admins.disabled"));
-        }).build(cont).width(320f).row();
+        new TextSlider(0, 1, 1, enabled ? 1 : 0, value -> bundle.format("admins.lever", bundle.get((enabled = value == 1) ? "admins.enabled" : "admins.disabled"))).build(cont).width(320f).row();
 
         cont.labelWrap("@admins.way").padTop(16f).width(320f).row();
         cont.table(table -> {
@@ -43,14 +41,10 @@ public class AdminsConfigDialog extends BaseDialog {
         }).left().row();
 
         cont.labelWrap("@admins.always").padTop(16f).width(320f).row();
-        new TextSlider(0, 1, 1, always ? 1 : 0, value -> {
-            return (always = value == 1) ? "@yes" : "@no";
-        }).update(slider -> slider.setDisabled(!enabled)).build(cont).width(320f).row();
+        new TextSlider(0, 1, 1, always ? 1 : 0, value -> (always = value == 1) ? "@yes" : "@no").update(slider -> slider.setDisabled(!enabled)).build(cont).width(320f).row();
 
         cont.labelWrap("@admins.strict").padTop(16f).width(320f).row();
-        new TextSlider(0, 1, 1, strict ? 1 : 0, value -> {
-            return (strict = value == 1) ? "@yes" : "@no";
-        }).update(slider -> slider.setDisabled(net.client())).build(cont).width(320f).row();
+        new TextSlider(0, 1, 1, strict ? 1 : 0, value -> (strict = value == 1) ? "@yes" : "@no").update(slider -> slider.setDisabled(net.client())).build(cont).width(320f).row();
 
         net.handleServer(ClientSnapshotCallPacket.class, (con, snapshot) -> {
             if (strict && con.player != null && !con.player.dead() && !con.kicked) {

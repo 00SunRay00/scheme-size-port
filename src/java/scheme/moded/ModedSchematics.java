@@ -206,11 +206,11 @@ public class ModedSchematics extends Schematics {
 
         private final Func<NormalizeResult, Schematic> create;
 
-        private Layer(Func<Tile, Block> provider) {
+        Layer(Func<Tile, Block> provider) {
             this.create = result -> create(result.x, result.y, result.x2, result.y2, provider);
         }
 
-        private Layer() {
+        Layer() {
             this.create = result -> createTerrain(result.x, result.y, result.x2, result.y2);
         }
 

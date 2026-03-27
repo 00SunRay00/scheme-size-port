@@ -25,63 +25,63 @@ import static scheme.SchemeVars.*;
 /** Last update - Jul 19, 2022 */
 public interface ModedInputHandler {
 
-    public int sizeX = mobile ? 0 : -16;
-    public int sizeY = mobile ? 32 : -16;
+    int sizeX = mobile ? 0 : -16;
+    int sizeY = mobile ? 32 : -16;
 
-    public default void modedInput() {}
+    default void modedInput() {}
 
-    public default void buildInput() {}
+    default void buildInput() {}
 
-    public boolean hasMoved(int x, int y);
+    boolean hasMoved(int x, int y);
 
-    public void changePanSpeed(float value);
+    void changePanSpeed(float value);
 
-    public void lockMovement();
+    void lockMovement();
 
-    public void lockShooting();
+    void lockShooting();
 
-    public void observe(Player target);
+    void observe(Player target);
 
-    public void flush(Seq<BuildPlan> plans);
+    void flush(Seq<BuildPlan> plans);
 
-    public default void flushLastRemoved() {
+    default void flushLastRemoved() {
         flush(build.removed);
         build.removed.clear();
     }
 
-    public default void flushBuildingTools() {
+    default void flushBuildingTools() {
         if (build.mode != Mode.remove) flush(build.plan);
         else build.plan.each(player.unit()::addBuild);
         build.plan.clear();
     }
 
-    public InputHandler asHandler();
+    InputHandler asHandler();
 
     // methods that exist but, who knows why, not available
-    public default Tile tileAt() {
+    default Tile tileAt() {
         return world.tiles.getc(tileX(), tileY());
     }
 
-    public default int tileX() {
+    default int tileX() {
         return World.toTile(input.mouseWorldX());
     }
 
-    public default int tileY() {
+    default int tileY() {
         return World.toTile(input.mouseWorldY());
     }
 
     // some drawing methods
-    public default void drawSize(int x1, int y1, int x2, int y2, int maxLength) {
+    default void drawSize(int x1, int y1, int x2, int y2, int maxLength) {
         String x = getSize(Math.abs(x1 - x2), maxLength);
         String y = getSize(Math.abs(y1 - y2), maxLength);
-        ui.showLabel(x + ", " + y, 0.02f, x2 * tilesize + sizeX, y2 * tilesize + sizeY);
+        ui.showLabel(x + ", " + y, 61252, 0.02f, x2 * tilesize + sizeX, y2 * tilesize + sizeY);
     }
 
-    public default String getSize(int size, int maxLength) {
+    default String getSize(int size, int maxLength) {
         return ++size >= maxLength ? "[accent]" + maxLength + "[]" : String.valueOf(size);
     }
 
-    public default void drawEditSelection(int x1, int y1, int x2, int y2, int maxLength){
+    default void drawEditSelection(int x1, int y1, int x2, int y2, int maxLength){
         NormalizeDrawResult result = Placement.normalizeDrawArea(Blocks.air, x1, y1, x2, y2, false, maxLength, 1f);
 
         drawSize(x1, y1, x2, y2, maxLength);
@@ -93,7 +93,7 @@ public interface ModedInputHandler {
         Lines.rect(result.x, result.y, result.x2 - result.x, result.y2 - result.y);
     }
 
-    public default void drawEditSelection(int x, int y, int radius) {
+    default void drawEditSelection(int x, int y, int radius) {
         Vec2[] polygons = Geometry.pixelCircle(radius, (index, cx, cy) -> Mathf.dst(cx, cy, index, index) < index);
         Lines.stroke(2f);
 
@@ -103,10 +103,10 @@ public interface ModedInputHandler {
         Lines.poly(polygons, x * tilesize - 4, y * tilesize - 4, tilesize);
     }
 
-    public default void drawLocked(float x, float y) {
+    default void drawLocked(float x, float y) {
         ui.showLabel(bundle.format(
                 Mathf.absin(25f, 1f) < .5f ? "locked.info" : "locked.bind",
                 Color.orange.cpy().lerp(Color.scarlet, Mathf.absin(3f, 1f))
-                ), 0.02f, x, y);
+                ),61252,0.02f,x,y);
     }
 }

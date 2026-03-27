@@ -53,9 +53,7 @@ public class ShortcutFragment {
                 schematics.all().each(schematic -> schematic.labels.contains(tag), schematic -> {
                     list.button(button -> button.stack(
                             new SchematicImage(schematic).setScaling(Scaling.fit),
-                            new Table(table -> table.top().table(Styles.black3, title -> {
-                                title.add(schematic.name(), Styles.outlineLabel, .60f).width(72f).labelAlign(Align.center).get().setEllipsis(true);
-                            }).pad(4f).width(72f))
+                            new Table(table -> table.top().table(Styles.black3, title -> title.add(schematic.name(), Styles.outlineLabel, .60f).width(72f).labelAlign(Align.center).get().setEllipsis(true)).pad(4f).width(72f))
                     ), () -> {
                         control.input.useSchematic(schematic);
                         hide();

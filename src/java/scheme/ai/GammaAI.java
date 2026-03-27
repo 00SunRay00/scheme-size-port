@@ -85,7 +85,7 @@ public class GammaAI extends AIController {
         public final Drawable icon;
         public final Cons<GammaAI> update;
 
-        private Updater(Drawable icon, Cons<GammaAI> update) {
+        Updater(Drawable icon, Cons<GammaAI> update) {
             this.icon = icon;
             this.update = update;
         }

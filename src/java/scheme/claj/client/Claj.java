@@ -16,11 +16,9 @@ import mindustry.game.EventType;
 public class Claj {
   static {
     // Pretty difficult to know when the player quits the game, there is no event...
-    Vars.ui.paused.hidden(() -> {
-      arc.util.Timer.schedule(() -> {
-        if (!Vars.net.active() || Vars.state.isMenu()) closeRoom();
-      }, 1f);
-    });
+    Vars.ui.paused.hidden(() -> arc.util.Timer.schedule(() -> {
+      if (!Vars.net.active() || Vars.state.isMenu()) closeRoom();
+    }, 1f));
     Events.run(EventType.HostEvent.class, Claj::closeRoom);
     Events.run(EventType.ClientPreConnectEvent.class, Claj::closeRoom);
     Events.run(EventType.DisposeEvent.class, () -> {

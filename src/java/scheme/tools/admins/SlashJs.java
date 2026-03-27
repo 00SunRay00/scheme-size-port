@@ -15,7 +15,6 @@ import scheme.tools.RainbowTeam;
 import static arc.Core.*;
 import static mindustry.Vars.*;
 import static scheme.SchemeVars.*;
-import static scheme.tools.MessageQueue.send;
 
 public class SlashJs implements AdminsTools {
 

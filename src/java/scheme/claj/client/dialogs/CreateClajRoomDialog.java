@@ -224,12 +224,10 @@ public class CreateClajRoomDialog extends BaseDialog {
             add.show();
           }).size(30f).pad(2, 5, 2, 5).right();
           
-          inner.button(Icon.trash, Styles.emptyi, () -> {
-            Vars.ui.showConfirm("@confirm", "@server.delete", () -> {
-              servers.removeKey(server.name);
-              if (deleted != null) deleted.run();
-            });
-          }).size(30f).pad(2, 5, 2, 5).right();
+          inner.button(Icon.trash, Styles.emptyi, () -> Vars.ui.showConfirm("@confirm", "@server.delete", () -> {
+            servers.removeKey(server.name);
+            if (deleted != null) deleted.run();
+          })).size(30f).pad(2, 5, 2, 5).right();
           
         } else {
           inner.button(Icon.pencilSmall, Styles.emptyi, () -> {
@@ -238,12 +236,10 @@ public class CreateClajRoomDialog extends BaseDialog {
             add.show();
           }).pad(4).right();
           
-          inner.button(Icon.trashSmall, Styles.emptyi, () -> {
-            Vars.ui.showConfirm("@confirm", "@server.delete", () -> {
-              servers.removeKey(server.name);
-              if (deleted != null) deleted.run();
-            });
-          }).pad(2).right();
+          inner.button(Icon.trashSmall, Styles.emptyi, () -> Vars.ui.showConfirm("@confirm", "@server.delete", () -> {
+            servers.removeKey(server.name);
+            if (deleted != null) deleted.run();
+          })).pad(2).right();
         }
       }
 
