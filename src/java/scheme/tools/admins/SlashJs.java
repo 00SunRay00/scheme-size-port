@@ -163,7 +163,15 @@ public class SlashJs implements AdminsTools {
         boolean fo = floor != null || overlay != null;
 
         send("f = @; b = @; o = @; d = @", getBlock(floor), getBlock(block), getBlock(overlay), getBlock(building));
-        send("todo = tile => { if(tile!=null){" + (fo ? "sflr(tile);" : "") + (block != null ? "if(tile.block()!=b)tile.setNet(b)" : "") + (building != null ? "if(tile.block()!=d)tile.setNet(d, Team." + player.team() + ", 0)" : "") + "} }");
+        send(
+                "todo = function(tile){ " +
+                        "if(tile != null){ " +
+                        (fo ? "sflr(tile);" : "") +
+                        (block != null ? "if(tile.block() != b){ tile.setNet(b); }" : "") +
+                        (building != null ? "if(tile.block() != d){ tile.setNet(d, Team." + player.team() + ", 0); }" : "") +
+                        "} " +
+                        "};"
+        );
         if (fo) send("sflr = tile => { if(tile.floor()!=f||tile.overlay()!=o)tile.setFloorNet(f==null?tile.floor():f,o==null?tile.overlay():o) }");
     }
 }
