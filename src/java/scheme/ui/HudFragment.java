@@ -204,19 +204,21 @@ public class HudFragment {
         getCommandButton(cont -> { // Shortcut and cursed schematics button
             if (!SchemeUpdater.installed("test-utils")) // hardcoded paddings
                 cont.row(); // for command button
+            if (mobile) return;
+            else {
+                cont.button("@schematics", Icon.paste, Styles.squareTogglet, () -> {
+                            if (shortfrag.visible) shortfrag.hide();
+                            else shortfrag.show(graphics.getWidth() - (int) Scl.scl(15f), graphics.getHeight() / 2);
+                        }).size(155f, 50f).margin(8f).checked(t -> shortfrag.visible)
+                        .visible(() -> !Vars.mobile || !control.input.isPlacing());
 
-            cont.button("@schematics", Icon.paste, Styles.squareTogglet, () -> {
-                        if (shortfrag.visible) shortfrag.hide();
-                        else shortfrag.show(graphics.getWidth() - (int) Scl.scl(15f), graphics.getHeight() / 2);
-                    }).size(155f, 50f).margin(8f).checked(t -> shortfrag.visible)
-                    .visible(() -> !Vars.mobile || !control.input.isPlacing());
+                if (!SchemeUpdater.installed("test-utils")) cont.row();
 
-            if (!SchemeUpdater.installed("test-utils")) cont.row();
-
-            cont.button("@none", Icon.menu, Styles.flatBordert, () -> m_schematics.nextLayer()).size(155f, 50f).margin(6f)
-                    .visible(() -> !Vars.mobile || !control.input.isPlacing())
-                    .update(button -> button.setText(bundle.get("layer." + m_schematics.layer)));
-        });
+                cont.button("@none", Icon.menu, Styles.flatBordert, () -> m_schematics.nextLayer()).size(155f, 50f).margin(6f)
+                        .visible(() -> !Vars.mobile || !control.input.isPlacing())
+                        .update(button -> button.setText(bundle.get("layer." + m_schematics.layer)));
+            }
+            });
 
         parent.fill(cont -> { // Mobile Buttons
             cont.name = "mobilebuttons";
@@ -318,7 +320,7 @@ public class HudFragment {
 
     private void getCommandButton(Cons<Table> cons) {
         if (mobile) Events.run(ClientLoadEvent.class, () -> { // the command button is created after the client is loaded
-            cons.get((Table) control.input.uiGroup.getChildren().get(1));
+            return;
         });
         else ui.hudGroup.fill(cont -> {
             cont.name = "shortcutbutton"; // it's here because there's no sense in renaming an already created table
