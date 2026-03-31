@@ -15,6 +15,7 @@ import arc.scene.ui.ImageButton.ImageButtonStyle;
 import arc.scene.ui.TextField.TextFieldFilter;
 import arc.scene.ui.TextField.TextFieldStyle;
 import arc.scene.ui.layout.*;
+import arc.struct.Seq;
 import arc.util.Align;
 import arc.util.Scaling;
 import arc.util.Time;
@@ -315,7 +316,26 @@ public class HudFragment {
     }
 
     private ImageButton getSchematicsButton() {
-        return (ImageButton) ((Table) ((Table) ui.hudGroup.find("overlaymarker")).getChildren().get(1)).getChildren().get(2);
+        Element overlay = ui.hudGroup.find("overlaymarker");
+        if (!(overlay instanceof Table)) return null;
+
+        Seq<Element> children = ((Table) overlay).getChildren();
+
+        if (children.size <= 1) return null;
+        Element second = children.get(1);
+
+        if (!(second instanceof Table)) return null;
+
+        Seq<Element> inner = ((Table) second).getChildren();
+
+        if (inner.size <= 2) return null;
+        Element target = inner.get(2);
+
+        if (target instanceof ImageButton) {
+            return (ImageButton) target;
+        }
+
+        return null;
     }
 
     private void getCommandButton(Cons<Table> cons) {
