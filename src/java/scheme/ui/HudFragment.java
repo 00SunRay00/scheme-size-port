@@ -319,22 +319,19 @@ public class HudFragment {
         Element overlay = ui.hudGroup.find("overlaymarker");
         if (!(overlay instanceof Table)) return null;
 
-        Seq<Element> children = ((Table) overlay).getChildren();
+        return findByName((Table) overlay, "schematics");
+    }
 
-        if (children.size <= 1) return null;
-        Element second = children.get(1);
-
-        if (!(second instanceof Table)) return null;
-
-        Seq<Element> inner = ((Table) second).getChildren();
-
-        if (inner.size <= 2) return null;
-        Element target = inner.get(2);
-
-        if (target instanceof ImageButton) {
-            return (ImageButton) target;
+    private ImageButton findByName(Table table, String name) {
+        for (Element e : table.getChildren()) {
+            if (name.equals(e.name) && e instanceof ImageButton) {
+                return (ImageButton) e;
+            }
+            if (e instanceof Table) {
+                ImageButton found = findByName((Table) e, name);
+                if (found != null) return found;
+            }
         }
-
         return null;
     }
 
