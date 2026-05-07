@@ -1,6 +1,10 @@
 package scheme;
 
+import arc.graphics.Blending;
+import arc.graphics.gl.FrameBuffer;
 import arc.graphics.g2d.Draw;
+import arc.util.Reflect;
+import mindustry.graphics.Layer;
 import arc.util.Log;
 import arc.util.Tmp;
 import mindustry.content.Blocks;
@@ -13,8 +17,8 @@ import mindustry.ui.CoreItemsDisplay;
 import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.Router;
 import mindustry.world.blocks.logic.LogicDisplay;
+import mindustry.world.blocks.logic.TileableLogicDisplay;
 import scheme.claj.client.dialogs.*;
-import scheme.moded.ModedGlyphLayout;
 import scheme.moded.ModedSchematics;
 import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
@@ -105,13 +109,63 @@ public class Main extends Mod {
             }
         };
 
-        content.blocks().each(block -> block instanceof LogicDisplay, block -> block.buildType = () -> ((LogicDisplay) block).new LogicDisplayBuild() {
-            @Override
-            public void draw() {
-                super.draw();
-                if (render.borderless) Draw.draw(Draw.z(), () -> Draw.rect(Draw.wrap(buffer.getTexture()), x, y, block.region.width * Draw.scl, -block.region.height * Draw.scl));
-            }
-        });
+        content.blocks().each(
+                block -> block instanceof LogicDisplay && !(block instanceof TileableLogicDisplay),
+                block -> {
+                    LogicDisplay ld = (LogicDisplay) block;
+                    block.buildType = () -> ld.new LogicDisplayBuild() {
+                        @Override
+                        public void draw() {
+                            super.draw();
+                            if (render.borderless) {
+                                Draw.draw(Draw.z(), () -> Draw.rect(
+                                        Draw.wrap(buffer.getTexture()),
+                                        x, y,
+                                        block.region.width * Draw.scl,
+                                        -block.region.height * Draw.scl
+                                ));
+                            }
+                        }
+                    };
+                }
+        );
+        content.blocks().each(
+                block -> block instanceof TileableLogicDisplay,
+                block -> {
+                    TileableLogicDisplay tld = (TileableLogicDisplay) block;
+                    block.buildType = () -> tld.new TileableLogicDisplayBuild() {
+                        @Override
+                        public void draw() {
+                            super.draw();
+
+                            if (render.borderless) {
+                                Draw.z(Layer.block + 0.021f);
+                                Draw.blend(Blending.disabled);
+                                Draw.draw(Draw.z(), () -> {
+                                    Object root = Reflect.get(LogicDisplay.LogicDisplayBuild.class, this, "rootDisplay");
+                                    FrameBuffer buf = null;
+                                    if (root != null) {
+                                        buf = Reflect.get(LogicDisplay.LogicDisplayBuild.class, root, "buffer");
+                                    }
+                                    if (buf == null) {
+                                        buf = Reflect.get(LogicDisplay.LogicDisplayBuild.class, this, "buffer");
+                                    }
+                                    if (buf != null) {
+                                        int originX = Reflect.get(TileableLogicDisplay.TileableLogicDisplayBuild.class, this, "originX");
+                                        int originY = Reflect.get(TileableLogicDisplay.TileableLogicDisplayBuild.class, this, "originY");
+                                        int rtx = tile.x - originX, rty = tile.y - originY;
+                                        int fs = Reflect.get(TileableLogicDisplay.class, tld, "frameSize");
+                                        Tmp.tr1.set(buf.getTexture(),
+                                                rtx * 32 - fs, rty * 32 - fs, 32, 32);
+                                        Draw.rect(Tmp.tr1, x, y, tilesize, -tilesize);
+                                    }
+                                });
+                                Draw.blend();
+                            }
+                        }
+                    };
+                }
+        );
 
         try {
             new JoinViaClajDialog();
