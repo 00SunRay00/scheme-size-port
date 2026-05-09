@@ -1,5 +1,6 @@
 package scheme.tools.admins;
 
+import arc.math.geom.Geometry;
 import arc.math.geom.Position;
 import arc.struct.Seq;
 import mindustry.entities.units.BuildPlan;
@@ -18,14 +19,38 @@ public class Darkdustry implements AdminsTools {
 
     public void manageRuleBool(boolean value, String name) {
         if (unusable()) return;
+        send("setrule", name, Boolean.toString(value));
     }
 
+    private int min(int a, int b) {
+        return a == -1 ? b : b == -1 ? a : Math.min(a, b);
+    }
     public void manageRuleStr(String value, String name) {
         if (unusable()) return;
-    }
-
-    public void manageRuleStr(boolean value, String name) {
-        if (unusable()) return;
+        StringBuilder actualValue = new StringBuilder();
+        int i = 0;
+        while (i != value.length()) {
+            int o = min(
+                    min(value.indexOf("\"", i), value.indexOf("\\", i)),
+                    min(value.indexOf("\r", i), value.indexOf("\n", i))
+            );
+            if (o == -1) {
+                actualValue.append(value, i, value.length() - i);
+                break;
+            }
+            if (i != o) {
+                actualValue.append(value, i, o);
+            }
+            switch (value.charAt(o)) {
+                case '\"': actualValue.append("\\\""); break;
+                case '\\': actualValue.append("\\\\"); break;
+                case '\n': actualValue.append("\\\n"); break;
+                case '\r': actualValue.append("\\\r"); break;
+                default: throw new IllegalStateException("Cannot escape symbol '"+value.charAt(o)+"'");
+            }
+            i = o + 1;
+        }
+        send("setrule", name, '"'+actualValue.toString()+'"');
     }
 
     public void manageUnit() {
@@ -89,12 +114,30 @@ public class Darkdustry implements AdminsTools {
 
     public void fill(int sx, int sy, int ex, int ey) {
         if (unusable()) return;
-        //Darkdustry is going fuck itself
+        //fuck you ion and yes this is a joel reference
+        tile.select((floor, block, overlay, building) -> {
+            block = building == null ? block : building;
+            sendPacket("schemesize.fill",
+                    block == null ? "null" : ""+block.id,
+                    0,
+                    floor == null ? "null" : ""+floor.id,
+                    overlay == null ? "null" : ""+overlay.id,
+                    sx, sy, ex - sx, ey - sy);
+        });
     }
 
     public void brush(int x, int y, int radius) {
         if (unusable()) return;
-        //Darkdustry is going fuck itself
+        //fuck you ion and yes this is a joel reference
+        tile.select((floor, block, overlay, building) -> {
+            block = building == null ? block : building;
+            sendPacket("schemesize.brush",
+                    block == null ? "null" : ""+block.id,
+                    0,
+                    floor == null ? "null" : ""+floor.id,
+                    overlay == null ? "null" : ""+overlay.id,
+                    radius, x, y);
+        });
     }
 
     public void flush(Seq<BuildPlan> plans) {
