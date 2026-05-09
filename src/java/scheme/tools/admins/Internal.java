@@ -158,6 +158,7 @@ public class Internal implements AdminsTools {
         if (tile == null) return;
 
         if ((floor != null && tile.floor() != floor) || (overlay != null && tile.overlay() != overlay))
+            if(overlay!=null) tile.setFloor(Blocks.water.asFloor());
             tile.setFloorNet(floor == null ? tile.floor() : floor, overlay == null ? tile.overlay() : overlay);
 
         if (block != null && tile.block() != block) tile.setNet(block);

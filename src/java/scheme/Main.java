@@ -10,6 +10,8 @@ import arc.util.Tmp;
 import mindustry.content.Blocks;
 import mindustry.game.Schematics;
 import mindustry.gen.Building;
+import arc.Events;
+import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.mod.Scripts;
 import mindustry.type.Item;
@@ -67,6 +69,9 @@ public class Main extends Mod {
         corefrag.build(ui.hudGroup);
 
         control.setInput(m_input.asHandler());
+        if (SchemeUpdater.installed("mi2-utilities-java")) {
+            Events.on(EventType.ClientLoadEvent.class, e -> control.setInput(m_input.asHandler()));
+        }
         renderer.addEnvRenderer(0, render::draw);
 
         if (m_schematics.requiresDialog) ui.showOkText("@rename.name", "@rename.text", () -> {});

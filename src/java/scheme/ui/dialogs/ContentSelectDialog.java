@@ -8,8 +8,6 @@ import arc.scene.ui.Slider;
 import arc.scene.ui.layout.Scl;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
-import mindustry.content.StatusEffects;
-import mindustry.content.UnitTypes;
 import mindustry.ctype.UnlockableContent;
 import mindustry.game.Team;
 import mindustry.gen.Icon;
@@ -23,15 +21,13 @@ public class ContentSelectDialog<T extends UnlockableContent> extends ListDialog
 
     public static final int row = mobile ? 5 : 10;
     public static final float size = mobile ? 52f : 64f;
-    public static final Seq<UnlockableContent> specials = Seq.with(
-            UnitTypes.latum, UnitTypes.renale, content.unit(53), content.unit(55), content.unit(64),
-            StatusEffects.muddy, StatusEffects.shielded, StatusEffects.corroded, StatusEffects.disarmed, StatusEffects.invincible);
 
     public Cons4<Player, Team, T, Float> callback;
     public Func<Float, String> format;
 
     public boolean showSlider;
     public int items;
+
 
     public ContentSelectDialog(String title, Seq<T> content, int min, int max, int step, Func<Float, String> format) {
         super(title);
@@ -90,6 +86,8 @@ public class ContentSelectDialog<T extends UnlockableContent> extends ListDialog
     }
 
     public boolean visible(T item) {
-        return item.logicVisible() || specials.contains(item);
+        return item.logicVisible() ||
+                item.uiIcon != atlas.getRegionMap().get("error") ||
+                !item.isHidden();
     }
 }
