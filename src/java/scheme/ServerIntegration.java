@@ -5,6 +5,7 @@ import arc.struct.IntMap;
 import arc.util.Strings;
 import mindustry.game.EventType.*;
 import mindustry.gen.Call;
+import mindustry.gen.Player;
 import mindustry.io.JsonIO;
 
 import static arc.Core.*;
