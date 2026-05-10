@@ -7,6 +7,7 @@ import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.TextureRegion;
 import arc.graphics.gl.FrameBuffer;
 import arc.util.Log;
+import arc.util.Time;
 import mindustry.content.StatusEffects;
 import mindustry.core.UI;
 import mindustry.game.EventType;
@@ -99,7 +100,7 @@ public class SchemeVars {
                 Log.err("Failed to create invincible outlined icon", ex);
             }
         });
-        Events.on(EventType.ContentPatchLoadEvent.class,event ->updateContent());
+        Events.on(EventType.WorldLoadEndEvent.class,event ->updateContent());
         Events.on(EventType.ClientCreateEvent.class,event ->updateContent());
         // m_schematics is created in Main to prevent dual loading
         m_input = mobile ? new ModedMobileInput() : new ModedDesktopInput();
@@ -131,6 +132,9 @@ public class SchemeVars {
     private static void updateContent(){
         units = new UnitsCache();
         builds = new BuildsCache();
+
+        units.refresh();
+        builds.refresh();
 
         unit = new ContentSelectDialog<>("@select.unit", content.units(), 0, 100, 1, value -> value == 0 ? "@select.unit.clear" : bundle.format("select.units", value));
         effect = new ContentSelectDialog<>("@select.effect", content.statusEffects(), 0, 500 * 3600, 60, value -> value == 0 ? "@select.effect.clear" : bundle.format("select.seconds", value / 60f));
