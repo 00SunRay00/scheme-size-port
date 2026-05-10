@@ -1,7 +1,7 @@
 package scheme.tools.admins;
 
 import arc.math.geom.Geometry;
-import arc.math.geom.Position;
+import arc.math.geom.Point2;
 import arc.struct.Seq;
 import mindustry.Vars;
 import mindustry.content.Blocks;
@@ -112,9 +112,9 @@ public class Internal implements AdminsTools {
         target.clearUnit();
     }
 
-    public void teleport(Position pos) {
+    public void teleport(Point2 pos) {
         if(player.unit() == null) return;
-        player.unit().set(pos); // it's always available
+        player.unit().set((float) pos.x, (float) pos.y); // it's always available
     }
 
     public void fill(int sx, int sy, int ex, int ey) {
@@ -149,7 +149,7 @@ public class Internal implements AdminsTools {
         if (!settings.getBool("adminsenabled")) {
             ui.showInfoFade(disabled);
             return true;
-        } else if (admin) ui.showInfoFade(unabailable);
+        } else if (admin) ui.showInfoFade(unavailable);
         return admin;
     }
 

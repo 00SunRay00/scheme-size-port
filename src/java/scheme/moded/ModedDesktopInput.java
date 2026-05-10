@@ -1,5 +1,6 @@
 package scheme.moded;
 
+import arc.Core;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
 import arc.math.Mathf;
@@ -20,6 +21,7 @@ import mindustry.gen.Mechc;
 import mindustry.world.blocks.power.PowerNode;
 import mi2u.input.InputOverwrite;
 import scheme.ai.GammaAI;
+import scheme.input.SBinding;
 import scheme.tools.BuildingTools.Mode;
 
 import static arc.Core.*;
@@ -172,6 +174,16 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
     }
 
     public void buildInput() {
+
+        if(Core.input.keyTap(SBinding.aiBind)) ai.show();
+        if(Core.input.keyTap(SBinding.coreBind)) admins.placeCore();
+        if(Core.input.keyTap(SBinding.despawnBind)) admins.despawn();
+        if(Core.input.keyTap(SBinding.effectBind)) admins.manageEffect();
+        if(Core.input.keyTap(SBinding.itemBind)) admins.manageItem();
+        if(Core.input.keyTap(SBinding.teamBind)) admins.manageTeam();
+        if(Core.input.keyTap(SBinding.unitBind)) admins.manageUnit();
+        if(Core.input.keyTap(SBinding.unitSpawnBind)) admins.spawnUnits();
+        if(Core.input.keyTap(SBinding.teleportBind)) admins.teleport();
         if (!hudfrag.building.fliped) build.setMode(Mode.none);
         if (build.mode == Mode.none) return;
 

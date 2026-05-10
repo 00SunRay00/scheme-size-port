@@ -1,5 +1,6 @@
 package scheme.tools.admins;
 
+import arc.math.geom.Point2;
 import arc.math.geom.Position;
 import arc.struct.Seq;
 import arc.util.Strings;
@@ -95,7 +96,7 @@ public class SlashJs implements AdminsTools {
         send("player.clearUnit()");
     }
 
-    public void teleport(Position pos) {
+    public void teleport(Point2 pos) {
         if (unusable()) return;
         String conpos = "(player.con, " + pos.toString().replace("(", ""); // Vec2 and Point2 returns (x, y)
         getPlayer(player);

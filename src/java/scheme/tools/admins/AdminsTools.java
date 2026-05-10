@@ -1,6 +1,6 @@
 package scheme.tools.admins;
 
-import arc.math.geom.Position;
+import arc.math.geom.Point2;
 import arc.struct.Seq;
 import mindustry.entities.Units;
 import mindustry.entities.units.BuildPlan;
@@ -15,7 +15,7 @@ import static mindustry.Vars.*;
 public interface AdminsTools {
 
     String disabled = bundle.format("admins.notenabled");
-    String unabailable = bundle.format("admins.notavailable");
+    String unavailable = bundle.format("admins.notavailable");
 
     void manageRuleBool(boolean value, String name);
 
@@ -39,10 +39,16 @@ public interface AdminsTools {
         despawn(player);
     }
 
-    void teleport(Position pos);
+    void teleport(Point2 pos);
+
+    default Point2 getTeleportPosition() {
+        if (mobile) return new Point2((int) camera.position.x, (int) camera.position.y);
+        else return new Point2((int) player.mouseX, (int) player.mouseY);
+    }
 
     default void teleport() {
-        teleport(camera.position);
+
+        teleport(getTeleportPosition());
     }
 
     default void look() {
