@@ -1,6 +1,7 @@
 package scheme.tools.admins;
 
 import arc.math.geom.Point2;
+import arc.math.geom.Position;
 import arc.struct.Seq;
 import mindustry.entities.Units;
 import mindustry.entities.units.BuildPlan;
@@ -8,6 +9,7 @@ import mindustry.game.Team;
 import mindustry.gen.Player;
 import mindustry.type.Item;
 import mindustry.type.UnitType;
+import scheme.tools.PositionBuild;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -39,15 +41,14 @@ public interface AdminsTools {
         despawn(player);
     }
 
-    void teleport(Point2 pos);
+    void teleport(Position pos);
 
-    default Point2 getTeleportPosition() {
-        if (mobile) return new Point2((int) camera.position.x, (int) camera.position.y);
-        else return new Point2((int) player.mouseX, (int) player.mouseY);
+    default Position getTeleportPosition() {
+        if (mobile) return PositionBuild.GetPosition(camera.position.x,camera.position.y);
+        else return PositionBuild.GetPosition( player.mouseX, player.mouseY);
     }
 
     default void teleport() {
-
         teleport(getTeleportPosition());
     }
 

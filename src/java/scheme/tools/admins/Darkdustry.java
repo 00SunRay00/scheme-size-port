@@ -1,7 +1,9 @@
 package scheme.tools.admins;
 
 import arc.math.geom.Point2;
+import arc.math.geom.Position;
 import arc.struct.Seq;
+import arc.util.Log;
 import mindustry.entities.units.BuildPlan;
 import mindustry.gen.Call;
 import mindustry.gen.Player;
@@ -106,9 +108,9 @@ public class Darkdustry implements AdminsTools {
         send("despawn", "#" + target.id);
     }
 
-    public void teleport(Point2 pos) {
+    public void teleport(Position pos) {
         if (unusable()) return;
-        send("tp", pos.x / tilesize, pos.y / tilesize);
+        send("tp", pos.getX() / tilesize, pos.getY() / tilesize);
     }
 
     public void fill(int sx, int sy, int ex, int ey) {

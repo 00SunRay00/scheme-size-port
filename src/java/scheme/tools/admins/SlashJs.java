@@ -96,7 +96,7 @@ public class SlashJs implements AdminsTools {
         send("player.clearUnit()");
     }
 
-    public void teleport(Point2 pos) {
+    public void teleport(Position pos) {
         if (unusable()) return;
         String conpos = "(player.con, " + pos.toString().replace("(", ""); // Vec2 and Point2 returns (x, y)
         getPlayer(player);
