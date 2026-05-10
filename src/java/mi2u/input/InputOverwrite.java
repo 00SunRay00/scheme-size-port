@@ -2,7 +2,6 @@ package mi2u.input;
 
 import arc.math.*;
 import arc.math.geom.*;
-import mi2u.*;
 import mindustry.gen.*;
 
 import static mindustry.Vars.*;
@@ -26,7 +25,7 @@ public interface InputOverwrite{
     default void move(Vec2 movement){}
 
     default void approach(Vec2 point, float radius, boolean checkWithin){
-        Vec2 vec = MI2UTmp.v1;
+        Vec2 vec = new Vec2();
         Unit unit = player.unit();
         if(checkWithin && unit.within(point.x, point.y, radius)){
             move(vec.setZero());
@@ -45,7 +44,7 @@ public interface InputOverwrite{
 
     default void approach(Position target, float radius, boolean checkWithin){
         if(target == null) return;
-        approach(MI2UTmp.v2.set(target.getX(),target.getY()), radius, checkWithin);
+        approach(new Vec2(target.getX(), target.getY()), radius, checkWithin);
     }
 
     default void clear(){}
