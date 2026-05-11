@@ -5,6 +5,7 @@ import arc.graphics.g2d.Draw;
 import arc.graphics.gl.FrameBuffer;
 import arc.util.Reflect;
 import arc.util.Tmp;
+import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.gen.Building;
 import mindustry.graphics.Layer;
@@ -52,13 +53,18 @@ public class UpdateContent {
                         @Override
                         public void draw() {
                             super.draw();
+
+                            if(!Vars.renderer.drawDisplays) return;
+
                             if (render.borderless) {
+                                Draw.blend(Blending.disabled);
                                 Draw.draw(Draw.z(), () -> Draw.rect(
                                         Draw.wrap(buffer.getTexture()),
                                         x, y,
                                         block.region.width * Draw.scl,
                                         -block.region.height * Draw.scl
                                 ));
+                                Draw.blend();
                             }
                         }
                     };
@@ -72,6 +78,8 @@ public class UpdateContent {
                         @Override
                         public void draw() {
                             super.draw();
+
+                            if(!Vars.renderer.drawDisplays) return;
 
                             if (render.borderless) {
                                 Draw.z(Layer.block + 0.021f);
