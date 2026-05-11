@@ -63,7 +63,7 @@ public interface AdminsTools {
         Position mousePostion = PositionBuild.GetPosition(player.mouseX(),player.mouseY);
         Groups.player.each(player -> {
             float distance = PositionBuild.GetPosition(player.x,player.y).dst(mousePostion);
-            if(distance>10*tilesize || player.equals(Vars.player)) return;
+            if(distance>3*tilesize || player.equals(Vars.player)) return;
             manageTeam(Team.derelict,player);
             despawn(player);
         });
