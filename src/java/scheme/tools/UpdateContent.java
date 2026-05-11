@@ -99,6 +99,7 @@ public class UpdateContent {
                             }
                         }
                     };
+                    block.allowRectanglePlacement = true;
                 }
         );
         content.blocks().each(
