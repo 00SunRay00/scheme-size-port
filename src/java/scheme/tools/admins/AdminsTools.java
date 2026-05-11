@@ -2,14 +2,19 @@ package scheme.tools.admins;
 
 import arc.math.geom.Point2;
 import arc.math.geom.Position;
+import arc.scene.Group;
 import arc.struct.Seq;
+import mindustry.Vars;
 import mindustry.entities.Units;
 import mindustry.entities.units.BuildPlan;
 import mindustry.game.Team;
+import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.type.Item;
 import mindustry.type.UnitType;
 import scheme.tools.PositionBuild;
+
+import java.awt.*;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -33,6 +38,8 @@ public interface AdminsTools {
 
     void manageTeam();
 
+    void manageTeam(Team derelict, Player player);
+
     void placeCore();
 
     void despawn(Player target);
@@ -50,6 +57,16 @@ public interface AdminsTools {
 
     default void teleport() {
         teleport(getTeleportPosition());
+    }
+
+    default void deletePlyaer(){
+        Position mousePostion = PositionBuild.GetPosition(player.mouseX(),player.mouseY);
+        Groups.player.each(player -> {
+            float distance = PositionBuild.GetPosition(player.x,player.y).dst(mousePostion);
+            if(distance>10*tilesize || player.equals(Vars.player)) return;
+            manageTeam(Team.derelict,player);
+            despawn(player);
+        });
     }
 
     default void look() {

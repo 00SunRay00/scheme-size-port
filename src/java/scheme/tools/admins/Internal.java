@@ -8,6 +8,7 @@ import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.entities.units.BuildPlan;
 import mindustry.game.Rules;
+import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
@@ -98,6 +99,15 @@ public class Internal implements AdminsTools {
             } else
                 RainbowTeam.add(target, target::team);
         });
+    }
+
+    public void manageTeam(Team team, Player target) {
+        if (unusable()) return;
+        if (team != null) {
+            RainbowTeam.remove(target);
+            target.team(team);
+        } else
+            RainbowTeam.add(target, target::team);
     }
 
     public void placeCore() {

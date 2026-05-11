@@ -1,10 +1,10 @@
 package scheme.tools.admins;
 
-import arc.math.geom.Point2;
 import arc.math.geom.Position;
 import arc.struct.Seq;
 import arc.util.Strings;
 import mindustry.entities.units.BuildPlan;
+import mindustry.game.Team;
 import mindustry.gen.Player;
 import mindustry.type.Item;
 import mindustry.type.StatusEffect;
@@ -80,6 +80,15 @@ public class SlashJs implements AdminsTools {
             } else
                 RainbowTeam.add(target, t -> send("Groups.player.getByID(@).team(Team.get(@))", target.id, t.id));
         });
+    }
+
+    public void manageTeam(Team team, Player target) {
+        if (unusable()) return;
+        if (team != null) {
+            RainbowTeam.remove(target);
+            send("Groups.player.getByID(@).team(Team.@)", target.id, team);
+        } else
+            RainbowTeam.add(target, t -> send("Groups.player.getByID(@).team(Team.get(@))", target.id, t.id));
     }
 
     public void placeCore() {

@@ -13,6 +13,9 @@ import mindustry.world.Tile;
 import mindustry.world.blocks.distribution.Router;
 import mindustry.world.blocks.logic.LogicDisplay;
 import mindustry.world.blocks.logic.TileableLogicDisplay;
+import mindustry.world.blocks.units.Reconstructor;
+import mindustry.world.blocks.units.UnitFactory;
+
 
 import static mindustry.Vars.*;
 import static mindustry.Vars.content;
@@ -94,6 +97,30 @@ public class UpdateContent {
                                 });
                                 Draw.blend();
                             }
+                        }
+                    };
+                }
+        );
+        content.blocks().each(
+                block -> block instanceof UnitFactory,
+                block -> {
+                    UnitFactory tld = (UnitFactory) block;
+                    block.buildType = () -> tld.new UnitFactoryBuild() {
+                        @Override
+                        public boolean canSetCommand(){
+                            return true;
+                        }
+                    };
+                }
+        );
+        content.blocks().each(
+                block -> block instanceof Reconstructor,
+                block -> {
+                    Reconstructor tld = (Reconstructor) block;
+                    block.buildType = () -> tld.new ReconstructorBuild() {
+                        @Override
+                        public boolean canSetCommand(){
+                            return true;
                         }
                     };
                 }

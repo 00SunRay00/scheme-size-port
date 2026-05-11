@@ -13,7 +13,8 @@ public class SBinding {
     unitBind = KeyBind.add("scheme_unit",   KeyCode.unset, "SchemeSize"),
     unitSpawnBind = KeyBind.add("scheme_unit_spawn",   KeyCode.unset, "SchemeSize"),
     effectBind = KeyBind.add("scheme_effect",   KeyCode.unset, "SchemeSize"),
-    itemBind = KeyBind.add("scheme_item",   KeyCode.unset, "SchemeSize");
+    itemBind = KeyBind.add("scheme_item",   KeyCode.unset, "SchemeSize"),
+    deletePLayer = KeyBind.add("scheme_delete_player",   KeyCode.unset, "SchemeSize");
     public static void load(){
         for(KeyBind bind : KeyBind.all) bind.load();
     }

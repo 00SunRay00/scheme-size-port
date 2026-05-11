@@ -18,6 +18,7 @@ import mindustry.input.*;
 import mindustry.input.Placement.NormalizeDrawResult;
 import mindustry.input.Placement.NormalizeResult;
 import mindustry.gen.Mechc;
+import mindustry.world.Block;
 import mindustry.world.blocks.power.PowerNode;
 import mi2u.input.InputOverwrite;
 import scheme.ai.GammaAI;
@@ -73,8 +74,8 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
             NormalizeDrawResult result = Placement.normalizeDrawArea(Blocks.air, schemX, schemY, cursorX, cursorY, false, 0, 1f);
             Tmp.r1.set(result.x, result.y, result.x2 - result.x, result.y2 - result.y);
 
-            for (var plan : player.team().data().plans) {
-                var block = plan.block;
+            for (mindustry.game.Teams.BlockPlan plan : player.team().data().plans) {
+                Block block = plan.block;
                 if (block.bounds(plan.x, plan.y, Tmp.r2).overlaps(Tmp.r1))
                     drawSelected(plan.x, plan.y, plan.block, Pal.sapBullet);
             }
@@ -184,6 +185,7 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
         if(Core.input.keyTap(SBinding.unitBind)) admins.manageUnit();
         if(Core.input.keyTap(SBinding.unitSpawnBind)) admins.spawnUnits();
         if(Core.input.keyTap(SBinding.teleportBind)) admins.teleport();
+        if(Core.input.keyTap(SBinding.deletePLayer)) admins.deletePlyaer();;
         if (!hudfrag.building.fliped) build.setMode(Mode.none);
         if (build.mode == Mode.none) return;
 

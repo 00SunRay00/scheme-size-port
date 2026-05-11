@@ -112,6 +112,9 @@ public class SchemeVars {
         adminscfg = new AdminsConfigDialog();
         rendercfg = new RendererConfigDialog();
 
+        units = new UnitsCache();
+        builds = new BuildsCache();
+
         ai = new AISelectDialog();
         team = new TeamSelectDialog();
         tile = new TileSelectDialog();
@@ -130,8 +133,6 @@ public class SchemeVars {
         updateContent();
     }
     private static void updateContent(){
-        units = new UnitsCache();
-        builds = new BuildsCache();
 
         units.refresh();
         builds.refresh();
