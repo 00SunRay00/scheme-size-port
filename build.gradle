@@ -5,8 +5,8 @@ plugins {
 version = '1.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_28
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 base {
@@ -103,3 +103,11 @@ tasks.register("deploy", Jar) {
         delete "$buildDir/libs/${base.archivesName.get()}Desktop.jar"
         delete "$buildDir/libs/${base.archivesName.get()}Android.jar"
     }
+}
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += "--enable-preview"
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += "--enable-preview"
+}
