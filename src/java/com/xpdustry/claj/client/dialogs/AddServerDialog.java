@@ -47,7 +47,7 @@ public class AddServerDialog extends mindustry.ui.dialogs.BaseDialog {
     buttons.button("@ok", () -> {
       if(callback != null) callback.get(nameField.getText(), addressField.getText());
       hide();
-    }).disabled(_ -> lastError != null || nameField.getText().isEmpty() || addressField.getText().isEmpty());
+    }).disabled(ignored -> lastError != null || nameField.getText().isEmpty() || addressField.getText().isEmpty());
 
     hidden(() -> {
       lastError = null;

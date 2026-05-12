@@ -56,7 +56,7 @@ public class ClajProxy extends ProxyClient {
     errorHandler = e -> provider.handleProxyError(this, e);
 
     receiver.handle(Connect.class, this::requestRoomId);
-    receiver.handle(Disconnect.class, _ -> runRoomClose(CloseReason.error));
+    receiver.handle(Disconnect.class, ignored -> runRoomClose(CloseReason.error));
 
     receiver.handle(ConnectionJoinPacket.class, p -> conConnected(p.conID, p.addressHash));
     receiver.handle(ConnectionClosedPacket.class, p -> conDisconnected(p.conID, p.reason));

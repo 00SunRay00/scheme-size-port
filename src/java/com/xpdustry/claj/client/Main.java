@@ -41,7 +41,6 @@ public class Main extends Mod {
   public void init() {
     provider = new MindustryClajProvider();
     Claj.init(provider);
-    ClajUpdater.schedule();
     initEvents();
     ClajUi.init();
   }

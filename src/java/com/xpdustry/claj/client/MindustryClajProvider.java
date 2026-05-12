@@ -57,7 +57,7 @@ public class MindustryClajProvider implements ClajProvider {
     mindustryServer = Reflect.get(mindustryProvider, "server");
     mindustryServerDispatcher = Reflect.get(mindustryServer, "dispatchListener");
     mindustrySerializer = new PacketSerializer();
-    clajVersion = ClajVersion.of(Main.getMeta().version);
+    clajVersion = "2.4";
     implType = ClajType.of("Mindustry");
   }
 

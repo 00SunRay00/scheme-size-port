@@ -75,7 +75,7 @@ public abstract class ProxyClient extends Client {
     receiver = new ClientReceiver(this, taskPoster);
     writeBufferThreshold = (int)(writeBufferSize * 0.8f);
 
-    receiver.handle(Disconnect.class, _ -> {
+    receiver.handle(Disconnect.class, ignored -> {
       Throwable error = getLastProtocolError();
       if (error != null) errorHandler.get(error);
     });

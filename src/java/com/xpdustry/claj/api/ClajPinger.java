@@ -91,7 +91,7 @@ public class ClajPinger extends Client {
     this.provider = provider;
     this.receiver = new ClientReceiver(this, null); // no need to delegate to the main thread
 
-    receiver.handle(Disconnect.class, _ -> {
+    receiver.handle(Disconnect.class, ignored -> {
       Throwable error = getLastProtocolError();
       if (error != null) provider.handlePingerError(this, error);
       failed(error);

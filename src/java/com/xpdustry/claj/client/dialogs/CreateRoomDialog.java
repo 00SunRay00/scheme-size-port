@@ -67,11 +67,11 @@ public class CreateRoomDialog extends BaseDialog {
     makeButtonOverlay();
     addCloseButton();
     buttons.button("@claj.manage.create", Icon.add, this::createRoom)
-           .disabled(_ -> Claj.get().proxies.isRoomCreated() || selected == null);
+           .disabled(ignored -> Claj.get().proxies.isRoomCreated() || selected == null);
     if (Vars.mobile) buttons.row();
     buttons.button("@claj.manage.delete", Icon.cancel, this::closeRoom)
-           .disabled(_ -> Claj.get().proxies.isRoomClosed());
-    buttons.button("@copylink", Icon.copy, this::copyLink).disabled(_ -> link == null);
+           .disabled(ignored -> Claj.get().proxies.isRoomClosed());
+    buttons.button("@copylink", Icon.copy, this::copyLink).disabled(ignored -> link == null);
 
     keyDown(KeyCode.f5, this::refreshAll);
     shown(() -> Time.run(7f, this::refreshAll)); // Gives time to this dialog to display
@@ -117,7 +117,7 @@ public class CreateRoomDialog extends BaseDialog {
 
       if (Vars.mobile) {
         root.buttonRow("@claj.manage.name", Icon.planet, this::show)
-            .disabled(_ -> !Vars.net.server()).row();
+            .disabled(ignored -> !Vars.net.server()).row();
         return;
 
       // Makes it compatible with foo's client by checking the hosting button.
@@ -125,12 +125,12 @@ public class CreateRoomDialog extends BaseDialog {
       // Also there is no way to get this property, so we need reflection.
       } else if (Reflect.<Integer>get(buttons.get(buttons.size-2), "colspan") == 2)
         root.button("@claj.manage.name", Icon.planet, this::show).colspan(2).width(450f)
-            .disabled(_ -> !Vars.net.server()).row();
+            .disabled(ignored -> !Vars.net.server()).row();
 
       // Probably the foo's client, use a normal button
       else
         root.button("@claj.manage.name", Icon.planet, this::show)
-            .disabled(_ -> !Vars.net.server()).row();
+            .disabled(ignored -> !Vars.net.server()).row();
 
       // move the claj button above the quit button
       buttons.swap(buttons.size-1, buttons.size-2);
@@ -280,7 +280,7 @@ public class CreateRoomDialog extends BaseDialog {
       else dest.image(Icon.warning, Color.yellow).padBottom(3).left().get().scaleBy(-0.22f);
       if (Vars.mobile) dest.row();
       dest.add(s.ping + "ms", Color.lightGray, 0.91f).left();
-    }, _ -> {
+    }, ignored -> {
       dest.clear();
       dest.image(Icon.cancel, Color.red).left();
     });

@@ -216,7 +216,7 @@ public class BrowserDialog extends BaseDialog {
     if (Core.settings.getBool("claj-collapsed-" + server.name, false)) return;
     if (refreshingList || !refreshing.add(server)) return;
     servers.put(server, table);
-    pingAndListServer(server, table, () -> refreshing.remove(server), _ -> refreshing.remove(server));
+    pingAndListServer(server, table, () -> refreshing.remove(server), ignored -> refreshing.remove(server));
   }
 
   public void pingAndListServer(Server server, Table dest, Runnable done, Cons<Exception> error) {

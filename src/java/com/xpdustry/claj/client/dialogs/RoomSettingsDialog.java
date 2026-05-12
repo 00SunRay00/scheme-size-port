@@ -102,7 +102,7 @@ public class RoomSettingsDialog extends BaseDialog {
         general.table(inner -> {
           Vars.ui.addDescTooltip(inner.add(isProtected).left().get(), "@claj.settings.protected.help");
           inner.button(Icon.edit, fixedEmptyi, 30, () -> ClajUi.password.show(this::setPassword, false))
-               .disabled(_ -> !isProtected.isChecked()).padLeft(20f).marginBottom(5).get().getImage()
+               .disabled(ignored -> !isProtected.isChecked()).padLeft(20f).marginBottom(5).get().getImage()
                .setScale(0.9f);
         }).left().padTop(5f).row();
         Vars.ui.addDescTooltip(general.add(autoHost).left().disabled(true).padTop(5f).padBottom(5f)
