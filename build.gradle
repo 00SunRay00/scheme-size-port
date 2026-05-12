@@ -34,7 +34,7 @@ ext {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs.addAll(['--release', '8'])
+    options.compilerArgs.addAll(['--release', '17'])
 }
 
 dependencies {
