@@ -1,22 +1,3 @@
-/**
- * This file is part of CLaJ. The system that allows you to play with your friends,
- * just by creating a room, copying the link and sending it to your friends.
- * Copyright (c) 2025-2026  Xpdustry
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package com.xpdustry.claj.api;
 
 import java.nio.ByteBuffer;
@@ -33,20 +14,21 @@ import com.xpdustry.claj.common.net.FrameworkSerializer;
 import com.xpdustry.claj.common.packets.Packet;
 import com.xpdustry.claj.common.packets.RawPacket;
 
-
 public class ClajClientSerializer implements NetSerializer, FrameworkSerializer {
+
   protected final ThreadLocal<ByteBufferInput> read = Threads.local(ByteBufferInput::new);
   protected final ThreadLocal<ByteBufferOutput> write = Threads.local(ByteBufferOutput::new);
 
   @Override
   public Object read(ByteBuffer buffer) {
     if (!buffer.hasRemaining()) return null;
+
     return switch (buffer.get()) {
       case ClajNet.frameworkId -> readFramework(buffer);
       case ClajNet.oldId -> throw new ArcNetException("Received a packet from the old CLaJ protocol");
       case ClajNet.id -> readClaj(buffer);
       default -> {
-        buffer.position(buffer.position()-1);
+        buffer.position(buffer.position() - 1);
         throw new ArcNetException("Unknown protocol type: " + buffer.get());
       }
     };
@@ -54,15 +36,21 @@ public class ClajClientSerializer implements NetSerializer, FrameworkSerializer 
 
   public Packet readClaj(ByteBuffer buffer) {
     Packet packet = ClajNet.newPacket(buffer.get());
-    if(!packet.allow(false)) throw new ArcNetException("Invalid packet type for endpoint: " + packet.getClass());
+
+    if (!packet.allow(false)) {
+      throw new ArcNetException("Invalid packet type for endpoint: " + packet.getClass());
+    }
+
     ByteBufferInput in = read.get();
     in.buffer = buffer;
+
     packet.read(in);
     return packet;
   }
 
   @Override
   public void write(ByteBuffer buffer, Object object) {
+
     if (object instanceof ByteBuffer buf) {
       buffer.put(buf);
 
@@ -78,18 +66,13 @@ public class ClajClientSerializer implements NetSerializer, FrameworkSerializer 
   }
 
   public void writeClaj(ByteBuffer buffer, Packet packet) {
-    if (!(packet instanceof RawPacket)) buffer.put(ClajNet.id).put(ClajNet.getId(packet));
+    if (!(packet instanceof RawPacket)) {
+      buffer.put(ClajNet.id).put(ClajNet.getId(packet));
+    }
 
     ByteBufferOutput out = write.get();
     out.buffer = buffer;
-    packet.write(out);
-  }
-}
 
-  public void writeClaj(ByteBuffer buffer, Packet packet) {
-    if (!(packet instanceof RawPacket)) buffer.put(ClajNet.id).put(ClajNet.getId(packet));
-    ByteBufferOutput out = write.get();
-    out.buffer = buffer;
     packet.write(out);
   }
 
@@ -97,7 +80,7 @@ public class ClajClientSerializer implements NetSerializer, FrameworkSerializer 
   // Default methods sends a signed short instead of an unsigned one...
   @Override
   public void writeLength(ByteBuffer buffer, int length) {
-    buffer.putChar((char)length); // char is encoded as an unsigned short
+    buffer.putChar((char)length);
   }
 
   @Override
