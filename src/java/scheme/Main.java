@@ -13,7 +13,7 @@ import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
 import scheme.tools.UpdateContent;
 import scheme.ui.MapResizeFix;
-import com.xpdustry.claj.client
+import com.xpdustry.claj.client;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
