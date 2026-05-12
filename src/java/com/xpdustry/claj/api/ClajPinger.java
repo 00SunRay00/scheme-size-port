@@ -127,8 +127,8 @@ public class ClajPinger extends Client {
   public void run() {
     shutdown = starting = false;
     try { super.run(); }
-    catch (ClosedSelectorException _) {}
-    catch (ArcNetException _) {} // Already handled by disconnect event
+    catch (ClosedSelectorException e) {}
+    catch (ArcNetException e) {} // Already handled by disconnect event
     catch (Exception e) {
       provider.handlePingerError(this, e);
       failed(e);

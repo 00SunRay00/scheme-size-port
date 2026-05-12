@@ -113,8 +113,8 @@ public abstract class ProxyClient extends Client {
   public void run() {
     shutdown = starting = false;
     try { super.run(); }
-    catch (ClosedSelectorException _) { close(); }
-    catch (ArcNetException _) {} // Already handled by disconnect event
+    catch (ClosedSelectorException e) { close(); }
+    catch (ArcNetException e) {} // Already handled by disconnect event
     catch (Exception e) {
       if (errorHandler != null) errorHandler.get(e);
       else throw e;

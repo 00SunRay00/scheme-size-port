@@ -133,7 +133,7 @@ public class ClajPingerManager {
       if (pinger == null) continue;
       pinger.stop();
       try { pinger.dispose(); }
-      catch (Exception _) {}
+      catch (Exception e) {}
     }
   }
 
