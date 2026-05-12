@@ -103,8 +103,5 @@ tasks.register("deploy", Jar) {
         delete "$buildDir/libs/${base.archivesName.get()}Desktop.jar"
         delete "$buildDir/libs/${base.archivesName.get()}Android.jar"
     }
-<<<<<<< HEAD
+
 }
-=======
-}
->>>>>>> 66bec4f91f4b480e36bd3cb25b4fa6febe60a8a3
