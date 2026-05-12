@@ -1,27 +1,18 @@
 package scheme;
 
-import arc.graphics.Blending;
-import arc.graphics.gl.FrameBuffer;
-import arc.graphics.g2d.Draw;
-import arc.util.Reflect;
-import mindustry.graphics.Layer;
 import arc.util.Log;
-import arc.util.Tmp;
-import mindustry.content.Blocks;
 import mindustry.game.Schematics;
-import mindustry.gen.Building;
+import arc.Events;
+import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.mod.Scripts;
-import mindustry.type.Item;
 import mindustry.ui.CoreItemsDisplay;
-import mindustry.world.Tile;
-import mindustry.world.blocks.distribution.Router;
-import mindustry.world.blocks.logic.LogicDisplay;
-import mindustry.world.blocks.logic.TileableLogicDisplay;
 import scheme.claj.client.dialogs.*;
+import scheme.input.SBinding;
 import scheme.moded.ModedSchematics;
 import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
+import scheme.tools.UpdateContent;
 import scheme.ui.MapResizeFix;
 
 import static arc.Core.*;
@@ -52,6 +43,7 @@ public class Main extends Mod {
         MapResizeFix.load();
         MessageQueue.load();
         RainbowTeam.load();
+        SBinding.load();
 
         ui.schematics = schemas;
         ui.listfrag = listfrag;
@@ -67,6 +59,9 @@ public class Main extends Mod {
         corefrag.build(ui.hudGroup);
 
         control.setInput(m_input.asHandler());
+        if (SchemeUpdater.installed("mi2-utilities-java")) {
+            Events.on(EventType.ClientLoadEvent.class, e -> control.setInput(m_input.asHandler()));
+        }
         renderer.addEnvRenderer(0, render::draw);
 
         if (m_schematics.requiresDialog) ui.showOkText("@rename.name", "@rename.text", () -> {});
@@ -89,83 +84,7 @@ public class Main extends Mod {
             error(e);
         }
 
-        Blocks.distributor.buildType = () -> ((Router) Blocks.distributor).new RouterBuild() {
-            @Override
-            public boolean canControl() { return true; }
-
-            @Override
-            public Building getTileTarget(Item item, Tile from, boolean set) {
-                Building target = super.getTileTarget(item, from, set);
-
-                if (unit != null && isControlled() && unit.isShooting()) {
-                    float angle = angleTo(unit.aimX(), unit.aimY());
-                    Tmp.v1.set(block.size * tilesize, 0f).rotate(angle).add(this);
-
-                    Building other = world.buildWorld(Tmp.v1.x, Tmp.v1.y);
-                    if (other != null && other.acceptItem(this, item)) target = other;
-                }
-
-                return target;
-            }
-        };
-
-        content.blocks().each(
-                block -> block instanceof LogicDisplay && !(block instanceof TileableLogicDisplay),
-                block -> {
-                    LogicDisplay ld = (LogicDisplay) block;
-                    block.buildType = () -> ld.new LogicDisplayBuild() {
-                        @Override
-                        public void draw() {
-                            super.draw();
-                            if (render.borderless) {
-                                Draw.draw(Draw.z(), () -> Draw.rect(
-                                        Draw.wrap(buffer.getTexture()),
-                                        x, y,
-                                        block.region.width * Draw.scl,
-                                        -block.region.height * Draw.scl
-                                ));
-                            }
-                        }
-                    };
-                }
-        );
-        content.blocks().each(
-                block -> block instanceof TileableLogicDisplay,
-                block -> {
-                    TileableLogicDisplay tld = (TileableLogicDisplay) block;
-                    block.buildType = () -> tld.new TileableLogicDisplayBuild() {
-                        @Override
-                        public void draw() {
-                            super.draw();
-
-                            if (render.borderless) {
-                                Draw.z(Layer.block + 0.021f);
-                                Draw.blend(Blending.disabled);
-                                Draw.draw(Draw.z(), () -> {
-                                    Object root = Reflect.get(LogicDisplay.LogicDisplayBuild.class, this, "rootDisplay");
-                                    FrameBuffer buf = null;
-                                    if (root != null) {
-                                        buf = Reflect.get(LogicDisplay.LogicDisplayBuild.class, root, "buffer");
-                                    }
-                                    if (buf == null) {
-                                        buf = Reflect.get(LogicDisplay.LogicDisplayBuild.class, this, "buffer");
-                                    }
-                                    if (buf != null) {
-                                        int originX = Reflect.get(TileableLogicDisplay.TileableLogicDisplayBuild.class, this, "originX");
-                                        int originY = Reflect.get(TileableLogicDisplay.TileableLogicDisplayBuild.class, this, "originY");
-                                        int rtx = tile.x - originX, rty = tile.y - originY;
-                                        int fs = Reflect.get(TileableLogicDisplay.class, tld, "frameSize");
-                                        Tmp.tr1.set(buf.getTexture(),
-                                                rtx * 32 - fs, rty * 32 - fs, 32, 32);
-                                        Draw.rect(Tmp.tr1, x, y, tilesize, -tilesize);
-                                    }
-                                });
-                                Draw.blend();
-                            }
-                        }
-                    };
-                }
-        );
+        UpdateContent.update();
 
         try {
             new JoinViaClajDialog();

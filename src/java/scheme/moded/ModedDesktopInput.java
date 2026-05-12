@@ -1,5 +1,6 @@
 package scheme.moded;
 
+import arc.Core;
 import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.Lines;
 import arc.math.Mathf;
@@ -16,8 +17,12 @@ import mindustry.graphics.Pal;
 import mindustry.input.*;
 import mindustry.input.Placement.NormalizeDrawResult;
 import mindustry.input.Placement.NormalizeResult;
+import mindustry.gen.Mechc;
+import mindustry.world.Block;
 import mindustry.world.blocks.power.PowerNode;
+import mi2u.input.InputOverwrite;
 import scheme.ai.GammaAI;
+import scheme.input.SBinding;
 import scheme.tools.BuildingTools.Mode;
 
 import static arc.Core.*;
@@ -25,14 +30,19 @@ import static mindustry.Vars.*;
 import static mindustry.input.PlaceMode.*;
 import static scheme.SchemeVars.*;
 
-/** Last update - Apr 18, 2023 */
-public class ModedDesktopInput extends DesktopInput implements ModedInputHandler {
+public class ModedDesktopInput extends DesktopInput implements ModedInputHandler, InputOverwrite {
 
     public boolean using, movementLocked;
     public int buildX, buildY, lastX, lastY, lastSize = 8;
 
     public Vec2 lastCamera = new Vec2();
     public Player observed;
+
+    public boolean ctrlBoost, mi2uBoost;
+    public boolean ctrlShoot, mi2uShoot;
+    public Vec2 shootXY = new Vec2();
+    public boolean ctrlMove;
+    public Vec2 mi2uMove = new Vec2();
 
     @Override
     protected void removeSelection(int x1, int y1, int x2, int y2, int maxLength) {
@@ -64,8 +74,8 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
             NormalizeDrawResult result = Placement.normalizeDrawArea(Blocks.air, schemX, schemY, cursorX, cursorY, false, 0, 1f);
             Tmp.r1.set(result.x, result.y, result.x2 - result.x, result.y2 - result.y);
 
-            for (var plan : player.team().data().plans) {
-                var block = plan.block;
+            for (mindustry.game.Teams.BlockPlan plan : player.team().data().plans) {
+                Block block = plan.block;
                 if (block.bounds(plan.x, plan.y, Tmp.r2).overlaps(Tmp.r1))
                     drawSelected(plan.x, plan.y, plan.block, Pal.sapBullet);
             }
@@ -139,6 +149,20 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
 
         modedInput();
         buildInput();
+
+        Unit unit = player.unit();
+        if (ctrlBoost) player.boosting = mi2uBoost;
+        if (ctrlShoot && unit != null) {
+            boolean boosted = unit instanceof Mechc && unit.isFlying();
+            player.shooting = mi2uShoot && !boosted;
+            if (player.shooting) {
+                player.mouseX = shootXY.x;
+                player.mouseY = shootXY.y;
+                unit.aim(shootXY);
+                unit.controlWeapons(true, player.shooting);
+            }
+        }
+        if (ctrlMove && unit != null) unit.movePref(mi2uMove);
     }
 
     @Override
@@ -151,6 +175,17 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
     }
 
     public void buildInput() {
+
+        if(Core.input.keyTap(SBinding.aiBind)) ai.show();
+        if(Core.input.keyTap(SBinding.coreBind)) admins.placeCore();
+        if(Core.input.keyTap(SBinding.despawnBind)) admins.despawn();
+        if(Core.input.keyTap(SBinding.effectBind)) admins.manageEffect();
+        if(Core.input.keyTap(SBinding.itemBind)) admins.manageItem();
+        if(Core.input.keyTap(SBinding.teamBind)) admins.manageTeam();
+        if(Core.input.keyTap(SBinding.unitBind)) admins.manageUnit();
+        if(Core.input.keyTap(SBinding.unitSpawnBind)) admins.spawnUnits();
+        if(Core.input.keyTap(SBinding.teleportBind)) admins.teleport();
+        if(Core.input.keyTap(SBinding.deletePLayer)) admins.deletePlyaer();;
         if (!hudfrag.building.fliped) build.setMode(Mode.none);
         if (build.mode == Mode.none) return;
 
@@ -162,31 +197,29 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
 
         if (using) {
             if (build.mode == Mode.drop) build.drop(cursorX, cursorY);
-            if (has) {
-                if (build.mode == Mode.replace) build.replace(cursorX, cursorY);
-                if (build.mode == Mode.remove) build.remove(cursorX, cursorY);
-                if (build.mode == Mode.connect) {
-                    if (block instanceof PowerNode == false) block = Blocks.powerNode;
-                    build.connect(cursorX, cursorY, (x, y) -> {
-                        updateLine(x, y);
-                        build.plan.addAll(linePlans).remove(0);
-                    });
-                }
-
-                if (build.mode == Mode.fill) build.fill(buildX, buildY, cursorX, cursorY, maxSchematicSize);
-                if (build.mode == Mode.circle) build.circle(cursorX, cursorY);
-                if (build.mode == Mode.square) build.square(cursorX, cursorY, (x1, y1, x2, y2) -> {
-                    updateLine(x1, y1, x2, y2);
-                    build.plan.addAll(linePlans);
+            if (build.mode == Mode.replace) build.replace(cursorX, cursorY);
+            if (build.mode == Mode.remove) build.remove(cursorX, cursorY);
+            if (build.mode == Mode.connect) {
+                if (block instanceof PowerNode == false) block = Blocks.powerNode;
+                build.connect(cursorX, cursorY, (x, y) -> {
+                    updateLine(x, y);
+                    build.plan.addAll(linePlans).remove(0);
                 });
-
-                if (build.mode == Mode.brush) admins.brush(cursorX, cursorY, build.size);
-
-                lastX = cursorX;
-                lastY = cursorY;
-                lastSize = build.size;
-                linePlans.clear();
             }
+
+            if (build.mode == Mode.fill) build.fill(buildX, buildY, cursorX, cursorY, maxSchematicSize);
+            if (build.mode == Mode.circle) build.circle(cursorX, cursorY);
+            if (build.mode == Mode.square) build.square(cursorX, cursorY, (x1, y1, x2, y2) -> {
+                updateLine(x1, y1, x2, y2);
+                build.plan.addAll(linePlans);
+            });
+
+            if (build.mode == Mode.brush) admins.brush(cursorX, cursorY, build.size);
+
+            lastX = cursorX;
+            lastY = cursorY;
+            lastSize = build.size;
+            linePlans.clear();
 
             if (input.keyRelease(Binding.select)) {
                 flushBuildingTools();
@@ -241,5 +274,41 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
 
     public InputHandler asHandler() {
         return this;
+    }
+
+    @Override
+    public void boost(boolean boost) {
+        ctrlBoost = true;
+        mi2uBoost = boost;
+    }
+
+    @Override
+    public void pan(boolean ctrl, float x, float y) {
+        if (ctrl) {
+            panning = true;
+            camera.position.set(x, y);
+        }
+    }
+
+    @Override
+    public void shoot(Vec2 vec, boolean shoot, boolean ctrl) {
+        ctrlShoot = ctrl;
+        shootXY.set(vec);
+        mi2uShoot = shoot;
+    }
+
+    @Override
+    public void move(Vec2 movement) {
+        ctrlMove = true;
+        mi2uMove.set(movement);
+    }
+
+    @Override
+    public void clear() {
+        ctrlBoost = false;
+        ctrlShoot = false;
+        ctrlMove = false;
+        mi2uMove.setZero();
+        shootXY.setZero();
     }
 }

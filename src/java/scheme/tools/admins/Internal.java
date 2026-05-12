@@ -1,12 +1,14 @@
 package scheme.tools.admins;
 
 import arc.math.geom.Geometry;
+import arc.math.geom.Point2;
 import arc.math.geom.Position;
 import arc.struct.Seq;
 import mindustry.Vars;
 import mindustry.content.Blocks;
 import mindustry.entities.units.BuildPlan;
 import mindustry.game.Rules;
+import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Groups;
 import mindustry.gen.Player;
@@ -99,6 +101,15 @@ public class Internal implements AdminsTools {
         });
     }
 
+    public void manageTeam(Team team, Player target) {
+        if (unusable()) return;
+        if (team != null) {
+            RainbowTeam.remove(target);
+            target.team(team);
+        } else
+            RainbowTeam.add(target, target::team);
+    }
+
     public void placeCore() {
         if (unusable()) return;
         Tile tile = player.tileOn();
@@ -149,7 +160,7 @@ public class Internal implements AdminsTools {
         if (!settings.getBool("adminsenabled")) {
             ui.showInfoFade(disabled);
             return true;
-        } else if (admin) ui.showInfoFade(unabailable);
+        } else if (admin) ui.showInfoFade(unavailable);
         return admin;
     }
 
@@ -158,6 +169,7 @@ public class Internal implements AdminsTools {
         if (tile == null) return;
 
         if ((floor != null && tile.floor() != floor) || (overlay != null && tile.overlay() != overlay))
+            if(overlay!=null) tile.setFloor(Blocks.water.asFloor());
             tile.setFloorNet(floor == null ? tile.floor() : floor, overlay == null ? tile.overlay() : overlay);
 
         if (block != null && tile.block() != block) tile.setNet(block);

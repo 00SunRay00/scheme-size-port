@@ -44,8 +44,8 @@ public class TileSelectDialog extends BaseDialog {
         Seq<Folder> folders = Seq.with(
                 new Folder("select.floor", () -> floor, b -> b instanceof Floor && !(b instanceof OverlayFloor), b -> floor = b),
                 new Folder("select.block", () -> block, b -> b instanceof Prop, b -> block = b),
-                new Folder("select.overlay", () -> overlay, b -> b instanceof OverlayFloor, b -> overlay = b),
-                new Folder("select.building", () -> building, b -> b instanceof Block, b -> building = b));
+                new Folder("select.overlay", () -> overlay, b -> b instanceof Floor, b -> overlay = b),
+                new Folder("select.building", () -> building, b -> b.uiIcon != atlas.getRegionMap().get("error") || !(b instanceof Prop || b instanceof Floor || b.description == null), b -> building = b));
 
         list = new List<>(folders::each, Folder::name, Folder::icon, folder -> Pal.accent);
         list.onChanged = this::rebuild;
@@ -67,7 +67,7 @@ public class TileSelectDialog extends BaseDialog {
 
         content.blocks().each(folder::pred, block -> {
             TextureRegionDrawable drawable = new TextureRegionDrawable(block.uiIcon);
-            inner.button(drawable, () -> folder.callback(block));
+            inner.button(drawable, () -> folder.callback(block)).tooltip(block.localizedName);
 
             if (inner.getChildren().size % row == 0) inner.row();
         });

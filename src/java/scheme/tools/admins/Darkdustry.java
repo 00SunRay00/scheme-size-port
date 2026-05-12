@@ -1,9 +1,11 @@
 package scheme.tools.admins;
 
-import arc.math.geom.Geometry;
+import arc.math.geom.Point2;
 import arc.math.geom.Position;
 import arc.struct.Seq;
+import arc.util.Log;
 import mindustry.entities.units.BuildPlan;
+import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Player;
 import mindustry.world.Block;
@@ -95,6 +97,15 @@ public class Darkdustry implements AdminsTools {
         });
     }
 
+    public void manageTeam(Team team, Player target) {
+        if (unusable()) return;
+        if (team != null) {
+            RainbowTeam.remove(target);
+            send("team", team.id, "#" + target.id);
+        } else
+            RainbowTeam.add(target, t -> send("team", t.id, "#" + target.id));
+    }
+
     public void placeCore() {
         if (unusable()) return;
         if (player.buildOn() instanceof CoreBuild)
@@ -109,7 +120,7 @@ public class Darkdustry implements AdminsTools {
 
     public void teleport(Position pos) {
         if (unusable()) return;
-        send("tp", (int) pos.getX() / tilesize, (int) pos.getY() / tilesize);
+        send("tp", pos.getX() / tilesize, pos.getY() / tilesize);
     }
 
     public void fill(int sx, int sy, int ex, int ey) {
@@ -151,7 +162,7 @@ public class Darkdustry implements AdminsTools {
             ui.showInfoFade(disabled);
             return true;
         } else if (admin) ui.showInfoFade("@admins.notanadmin");
-        return admin; // darkness was be here
+        return admin; // darkness was here
     }
 
     private static void send(String command, Object... args) {

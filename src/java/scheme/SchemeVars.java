@@ -7,6 +7,7 @@ import arc.graphics.g2d.Draw;
 import arc.graphics.g2d.TextureRegion;
 import arc.graphics.gl.FrameBuffer;
 import arc.util.Log;
+import arc.util.Time;
 import mindustry.content.StatusEffects;
 import mindustry.core.UI;
 import mindustry.game.EventType;
@@ -99,6 +100,8 @@ public class SchemeVars {
                 Log.err("Failed to create invincible outlined icon", ex);
             }
         });
+        Events.on(EventType.WorldLoadEndEvent.class,event ->updateContent());
+        Events.on(EventType.ClientCreateEvent.class,event ->updateContent());
         // m_schematics is created in Main to prevent dual loading
         m_input = mobile ? new ModedMobileInput() : new ModedDesktopInput();
 
@@ -106,20 +109,16 @@ public class SchemeVars {
         admins = AdminsConfigDialog.getTools();
         render = new RendererTools();
         build = new BuildingTools();
-        units = new UnitsCache();
-        builds = new BuildsCache();
-
         adminscfg = new AdminsConfigDialog();
         rendercfg = new RendererConfigDialog();
+
+        units = new UnitsCache();
+        builds = new BuildsCache();
 
         ai = new AISelectDialog();
         team = new TeamSelectDialog();
         tile = new TileSelectDialog();
         tag = new TagSelectDialog();
-
-        unit = new ContentSelectDialog<>("@select.unit", content.units(), 0, 100, 1, value -> value == 0 ? "@select.unit.clear" : bundle.format("select.units", value));
-        effect = new ContentSelectDialog<>("@select.effect", content.statusEffects(), 0, 500 * 3600, 60, value -> value == 0 ? "@select.effect.clear" : bundle.format("select.seconds", value / 60f));
-        item = new ContentSelectDialog<>("@select.item", content.items(), -1000000, 1000000, 500, value -> value == 0 ? "@select.item.clear" : bundle.format("select.items", UI.formatAmount(value.longValue())));
 
         m_settings = new SettingsMenuDialog();
         schemas = new SchemasDialog();
@@ -130,6 +129,17 @@ public class SchemeVars {
         listfrag = new PlayerListFragment();
         shortfrag = new ShortcutFragment();
         corefrag = new CoreInfoFragment();
+
+        updateContent();
+    }
+    private static void updateContent(){
+
+        units.refresh();
+        builds.refresh();
+
+        unit = new ContentSelectDialog<>("@select.unit", content.units(), 0, 100, 1, value -> value == 0 ? "@select.unit.clear" : bundle.format("select.units", value));
+        effect = new ContentSelectDialog<>("@select.effect", content.statusEffects(), 0, 500 * 3600, 60, value -> value == 0 ? "@select.effect.clear" : bundle.format("select.seconds", value / 60f));
+        item = new ContentSelectDialog<>("@select.item", content.items(), -1000000, 1000000, 500, value -> value == 0 ? "@select.item.clear" : bundle.format("select.items", UI.formatAmount(value.longValue())));
     }
 
 }

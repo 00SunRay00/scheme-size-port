@@ -1,14 +1,19 @@
 package scheme.moded;
 
+import arc.math.Angles;
+import arc.math.geom.Vec2;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
+import arc.util.Time;
 import mindustry.content.Blocks;
 import mindustry.entities.units.BuildPlan;
+import mindustry.gen.Mechc;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
 import mindustry.input.*;
 import mindustry.input.Placement.NormalizeResult;
 import mindustry.world.blocks.power.PowerNode;
+import mi2u.input.InputOverwrite;
 import scheme.ai.GammaAI;
 import scheme.tools.BuildingTools.Mode;
 
@@ -18,12 +23,18 @@ import static mindustry.input.PlaceMode.*;
 import static scheme.SchemeVars.*;
 
 /** Last update - Feb 10, 2023 */
-public class ModedMobileInput extends MobileInput implements ModedInputHandler {
+public class ModedMobileInput extends MobileInput implements ModedInputHandler, InputOverwrite {
 
     public boolean using, movementLocked, lastTouched, shootingLocked;
     public int buildX, buildY, lastX, lastY, lastSize = 8;
 
     public Player observed;
+
+    public boolean ctrlBoost, mi2uBoost;
+    public boolean ctrlShoot, mi2uShoot;
+    public Vec2 shootXY = new Vec2();
+    public boolean ctrlMove;
+    public Vec2 mi2uMove = new Vec2();
 
     private boolean isRelease() {
         return lastTouched && !input.isTouched(0);
@@ -105,6 +116,19 @@ public class ModedMobileInput extends MobileInput implements ModedInputHandler {
             drawLocked(player.unit().x, player.unit().y);
         }
 
+        Unit unit = player.unit();
+        if (ctrlBoost) player.boosting = mi2uBoost;
+        if (ctrlShoot && unit != null) {
+            player.shooting = mi2uShoot && !(unit instanceof Mechc && unit.isFlying());
+            if (player.shooting) {
+                unit.rotation(Angles.moveToward(unit.rotation(), Angles.angle(shootXY.x - unit.x, shootXY.y - unit.y), unit.type.rotateSpeed * unit.speedMultiplier() * Time.delta * 1.5f));
+                player.mouseX = shootXY.x;
+                player.mouseY = shootXY.y;
+                unit.aim(player.mouseX, player.mouseY);
+                unit.controlWeapons(true, player.shooting);
+            }
+        }
+        if (ctrlMove && unit != null) unit.movePref(mi2uMove);
     }
 
     @Override
@@ -133,31 +157,29 @@ public class ModedMobileInput extends MobileInput implements ModedInputHandler {
 
         if (using) {
             if (build.mode == Mode.drop) build.drop(cursorX, cursorY);
-            if (has) {
-                if (build.mode == Mode.replace) build.replace(cursorX, cursorY);
-                if (build.mode == Mode.remove) build.remove(cursorX, cursorY);
-                if (build.mode == Mode.connect) {
-                    if (block instanceof PowerNode == false) block = Blocks.powerNode;
-                    build.connect(cursorX, cursorY, (x, y) -> {
-                        updateLine(x, y);
-                        build.plan.addAll(linePlans).remove(0);
-                    });
-                }
-
-                if (build.mode == Mode.fill) build.fill(buildX, buildY, cursorX, cursorY, maxSchematicSize);
-                if (build.mode == Mode.circle) build.circle(cursorX, cursorY);
-                if (build.mode == Mode.square) build.square(cursorX, cursorY, (x1, y1, x2, y2) -> {
-                    updateLine(x1, y1, x2, y2);
-                    build.plan.addAll(linePlans);
+            if (build.mode == Mode.replace) build.replace(cursorX, cursorY);
+            if (build.mode == Mode.remove) build.remove(cursorX, cursorY);
+            if (build.mode == Mode.connect) {
+                if (block instanceof PowerNode == false) block = Blocks.powerNode;
+                build.connect(cursorX, cursorY, (x, y) -> {
+                    updateLine(x, y);
+                    build.plan.addAll(linePlans).remove(0);
                 });
-
-                if (build.mode == Mode.brush) admins.brush(cursorX, cursorY, build.size);
-
-                lastX = cursorX;
-                lastY = cursorY;
-                lastSize = build.size;
-                linePlans.clear();
             }
+
+            if (build.mode == Mode.fill) build.fill(buildX, buildY, cursorX, cursorY, maxSchematicSize);
+            if (build.mode == Mode.circle) build.circle(cursorX, cursorY);
+            if (build.mode == Mode.square) build.square(cursorX, cursorY, (x1, y1, x2, y2) -> {
+                updateLine(x1, y1, x2, y2);
+                build.plan.addAll(linePlans);
+            });
+
+            if (build.mode == Mode.brush) admins.brush(cursorX, cursorY, build.size);
+
+            lastX = cursorX;
+            lastY = cursorY;
+            lastSize = build.size;
+            linePlans.clear();
 
             if (isRelease()) {
                 flushBuildingTools();
@@ -206,5 +228,38 @@ public class ModedMobileInput extends MobileInput implements ModedInputHandler {
 
     public InputHandler asHandler() {
         return this;
+    }
+
+    @Override
+    public void boost(boolean boost) {
+        ctrlBoost = true;
+        mi2uBoost = boost;
+    }
+
+    @Override
+    public void pan(boolean ctrl, float x, float y) {
+        if (ctrl) camera.position.set(x, y);
+    }
+
+    @Override
+    public void shoot(Vec2 vec, boolean shoot, boolean ctrl) {
+        ctrlShoot = ctrl;
+        shootXY.set(vec);
+        mi2uShoot = shoot;
+    }
+
+    @Override
+    public void move(Vec2 movement) {
+        ctrlMove = true;
+        mi2uMove.set(movement);
+    }
+
+    @Override
+    public void clear() {
+        ctrlBoost = false;
+        ctrlShoot = false;
+        ctrlMove = false;
+        mi2uMove.setZero();
+        shootXY.setZero();
     }
 }

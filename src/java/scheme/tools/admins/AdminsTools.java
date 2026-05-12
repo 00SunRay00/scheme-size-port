@@ -1,13 +1,20 @@
 package scheme.tools.admins;
 
+import arc.math.geom.Point2;
 import arc.math.geom.Position;
+import arc.scene.Group;
 import arc.struct.Seq;
+import mindustry.Vars;
 import mindustry.entities.Units;
 import mindustry.entities.units.BuildPlan;
 import mindustry.game.Team;
+import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.type.Item;
 import mindustry.type.UnitType;
+import scheme.tools.PositionBuild;
+
+import java.awt.*;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -15,7 +22,7 @@ import static mindustry.Vars.*;
 public interface AdminsTools {
 
     String disabled = bundle.format("admins.notenabled");
-    String unabailable = bundle.format("admins.notavailable");
+    String unavailable = bundle.format("admins.notavailable");
 
     void manageRuleBool(boolean value, String name);
 
@@ -31,6 +38,8 @@ public interface AdminsTools {
 
     void manageTeam();
 
+    void manageTeam(Team derelict, Player player);
+
     void placeCore();
 
     void despawn(Player target);
@@ -41,8 +50,23 @@ public interface AdminsTools {
 
     void teleport(Position pos);
 
+    default Position getTeleportPosition() {
+        if (mobile) return PositionBuild.GetPosition(camera.position.x,camera.position.y);
+        else return PositionBuild.GetPosition( player.mouseX, player.mouseY);
+    }
+
     default void teleport() {
-        teleport(camera.position);
+        teleport(getTeleportPosition());
+    }
+
+    default void deletePlyaer(){
+        Position mousePostion = PositionBuild.GetPosition(player.mouseX(),player.mouseY);
+        Groups.player.each(player -> {
+            float distance = PositionBuild.GetPosition(player.x,player.y).dst(mousePostion);
+            if(distance>3*tilesize || player.equals(Vars.player)) return;
+            manageTeam(Team.derelict,player);
+            despawn(player);
+        });
     }
 
     default void look() {
