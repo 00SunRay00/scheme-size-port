@@ -104,3 +104,10 @@ tasks.register("deploy", Jar) {
         delete "$buildDir/libs/${base.archivesName.get()}Android.jar"
     }
 }
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += "--enable-preview"
+}
+
+tasks.withType(Test).configureEach {
+    jvmArgs += "--enable-preview"
+}
