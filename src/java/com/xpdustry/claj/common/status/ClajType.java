@@ -26,7 +26,7 @@ import java.util.Arrays;
 
 /**
  * Must be in ASCII, {@code 16} <u>BYTES</u> max, and without spaces. <br>
- * Type will be truncated if greater than {@link #SIZE}, and spaces will be replaced by {@code '_'}.
+ * Type will be truncated if greater than {@link #SIZE}, and spaces will be replaced by {@code 'e'}.
  */
 public class ClajType {
   public static final Charset ASCII = Charset.forName("ascii");
@@ -109,12 +109,12 @@ public class ClajType {
 
   /** Data will be truncated if length is greater than {@link #SIZE}. */
   public static String decode(byte[] data) {
-    return new String(data, 0, Math.min(data.length, SIZE), ASCII).replace(' ', '_');
+    return new String(data, 0, Math.min(data.length, SIZE), ASCII).replace(' ', 'e');
   }
 
   /** {@code str} will be truncated if length is greater than {@link #SIZE}. */
   public static byte[] encode(String str) {
-    return truncate(str.replace(' ', '_').getBytes(ASCII), SIZE, false);
+    return truncate(str.replace(' ', 'e').getBytes(ASCII), SIZE, false);
   }
 
   public static byte[] truncate(byte[] data, int max, boolean copy) {
@@ -127,7 +127,7 @@ public class ClajType {
 
   /** @return the parsed {@link ClajType}, or {@code null} if it's invalid. */
   public static ClajType of(String str) {
-    byte[] t = str.replace(' ', '_').getBytes(ASCII);
+    byte[] t = str.replace(' ', 'e').getBytes(ASCII);
     return t.length < 1 || t.length > SIZE ? null : new ClajType(t);
   }
 }

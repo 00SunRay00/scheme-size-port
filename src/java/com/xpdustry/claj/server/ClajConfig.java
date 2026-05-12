@@ -110,7 +110,7 @@ public class ClajConfig {
       this.desc = desc == null ? "" : desc;
       this.defaultValue = def;
       this.type = def == null ? null : (Class<T>)def.getClass();
-      this.changed = changed == null ? _ -> {} : changed;
+      this.changed = changed == null ? e -> {} : changed;
 
       if (register) all.add(this);
       Autosaver.add(this, Autosaver.SavePriority.normal);

@@ -83,7 +83,7 @@ public class ClajRelay extends Server implements ApplicationListener {
     receiver = new ServerReceiver(this, Core.app::post);
     routines = new ClajRoutines();
 
-    setDiscoveryHandler((_, r) -> {
+    setDiscoveryHandler((e, r) -> {
       if (versionBuff == null)
         versionBuff = ByteBuffer.allocate(5).put(ClajNet.id).putInt(ClajVars.version.majorVersion);
       r.respond((ByteBuffer)versionBuff.rewind());
@@ -490,7 +490,7 @@ public class ClajRelay extends Server implements ApplicationListener {
 
   @Override
   public void init() {
-    Events.on(ClajEvents.ServerLoadedEvent.class, _ -> host(ClajVars.port));
+    Events.on(ClajEvents.ServerLoadedEvent.class, e -> host(ClajVars.port));
   }
 
   /** At this point it's too late to notify closure. */
@@ -502,7 +502,7 @@ public class ClajRelay extends Server implements ApplicationListener {
       clearAndStop();
     }
     try { super.dispose(); }
-    catch (Exception _) {}
+    catch (Exception e) {}
     Log.info("Server disposed.");
   }
 
@@ -915,7 +915,7 @@ public class ClajRelay extends Server implements ApplicationListener {
   /** Try to find a room using the base64 encoded id. */
   public ClajRoom getRoom(String encodedRoomId) {
     try { return getRoom(Strings.base64ToLong(encodedRoomId)); }
-    catch (Exception _) { return null; }
+    catch (Exception e) { return null; }
   }
 
   public static ClajConnection toClajCon(Connection con) {

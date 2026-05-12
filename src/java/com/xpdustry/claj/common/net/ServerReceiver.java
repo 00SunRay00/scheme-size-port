@@ -93,11 +93,11 @@ public class ServerReceiver implements NetListener {
   }
 
   public <T extends Packet> void handle(Class<T> type, Runnable listener) {
-    handle(type, (_, _) -> listener.run());
+    handle(type, (e, e) -> listener.run());
   }
 
   public <T extends Packet> void handle(Class<T> type, Cons<Connection> listener) {
-    handle(type, (c, _) -> listener.get(c));
+    handle(type, (c, e) -> listener.get(c));
   }
 
   public <T extends Packet> void handle(Class<T> type, Cons2<Connection, T> listener) {

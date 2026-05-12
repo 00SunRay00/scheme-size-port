@@ -52,7 +52,7 @@ public class ClajRoutines {
     pendingInfoRequests.clear();
     pendingInfoTasks.eachValue(Timer.Task::cancel);
     pendingInfoTasks.clear();
-    listCache.each((_, c) -> c.send());
+    listCache.each((e, c) -> c.send());
     listCache.clear();
     rates.clear();
     afk.eachValue(Timer.Task::cancel);

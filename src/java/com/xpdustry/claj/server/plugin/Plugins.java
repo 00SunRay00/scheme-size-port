@@ -184,7 +184,7 @@ public class Plugins implements ApplicationListener {
         try {
           Class.forName(s.getClassName(), false, e.key);
           return (Class<T>)e.value;
-        } catch (Throwable _) {}
+        } catch (Throwable e) {}
       }
     }
     return null;
@@ -255,7 +255,7 @@ public class Plugins implements ApplicationListener {
 
       try {
         meta = findMeta(resolveRoot(file.isDirectory() ? file : new ZipFi(file)));
-      } catch (Throwable _) {}
+      } catch (Throwable e) {}
 
       if (meta == null || meta.name == null) continue;
       metas.add(meta);

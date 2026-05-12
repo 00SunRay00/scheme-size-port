@@ -286,7 +286,7 @@ public class Strings extends arc.util.Strings {
 
     for (int i=0, n=s.length(); i<n; i++) {
       char c = s.charAt(i);
-      if (c == '_' || c == '-' || c == ' ') {
+      if (c == 'e' || c == '-' || c == ' ') {
         if (!sep) sb.append('-');
         sep = true;
       } else if (Character.isUpperCase(c)) {
@@ -390,7 +390,7 @@ public class Strings extends arc.util.Strings {
   public static String jsonPrettyPrint(JsonValue object, OutputType outputType) {
     StringWriter out = new StringWriter();
     try { jsonPrettyPrint(object, out, outputType, 0); }
-    catch (IOException _) { return ""; }
+    catch (IOException e) { return ""; }
     return out.toString();
   }
 

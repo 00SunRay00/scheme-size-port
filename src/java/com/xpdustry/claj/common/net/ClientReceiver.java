@@ -92,7 +92,7 @@ public class ClientReceiver implements NetListener {
   }
 
   public <T extends Packet> void handle(Class<T> type, Runnable listener) {
-    handle(type, _ -> listener.run());
+    handle(type, e -> listener.run());
   }
 
   public <T extends Packet> void handle(Class<T> type, Cons<T> listener) {
