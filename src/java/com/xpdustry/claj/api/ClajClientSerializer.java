@@ -63,11 +63,18 @@ public class ClajClientSerializer implements NetSerializer, FrameworkSerializer 
 
   @Override
   public void write(ByteBuffer buffer, Object object) {
-    switch (object) {
-      case ByteBuffer buf -> buffer.put(buf);
-      case FrameworkMessage framework -> writeFramework(buffer.put(ClajNet.frameworkId), framework);
-      case Packet packet -> writeClaj(buffer, packet);
-      default -> throw new ArcNetException("Unknown packet type: " + object.getClass());
+      if (object instanceof ByteBuffer buf) {
+        buffer.put(buf);
+  
+      } else if (object instanceof FrameworkMessage framework) {
+        writeFramework(buffer.put(ClajNet.frameworkId), framework);
+  
+      } else if (object instanceof Packet packet) {
+        writeClaj(buffer, packet);
+  
+      } else {
+        throw new ArcNetException("Unknown packet type: " + object.getClass());
+      }
     }
   }
 
