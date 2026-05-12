@@ -5,8 +5,8 @@ plugins {
 version = '1.0'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_28
-    targetCompatibility = JavaVersion.VERSION_28
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 base {
@@ -34,7 +34,7 @@ ext {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs.addAll(['--release', '17'])
+    options.compilerArgs.addAll(['--release', '8'])
 }
 
 dependencies {
