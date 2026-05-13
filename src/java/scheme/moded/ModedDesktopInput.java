@@ -10,7 +10,9 @@ import arc.struct.Seq;
 import arc.util.Time;
 import arc.util.Tmp;
 import mindustry.content.Blocks;
+import mindustry.core.World;
 import mindustry.entities.units.BuildPlan;
+import mindustry.game.Schematic;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
 import mindustry.graphics.Pal;
@@ -19,6 +21,7 @@ import mindustry.input.Placement.NormalizeDrawResult;
 import mindustry.input.Placement.NormalizeResult;
 import mindustry.gen.Mechc;
 import mindustry.world.Block;
+import mindustry.input.InputHandler.*;
 import mindustry.world.blocks.power.PowerNode;
 import mi2u.input.InputOverwrite;
 import scheme.ai.GammaAI;
@@ -172,6 +175,33 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
                 && !input.keyDown(Binding.mouseMove) && !input.keyDown(Binding.select))
             ai.update();
         else if (!movementLocked) super.updateMovement(unit);
+    }
+
+    int tileX(float cursorX){
+        Vec2 vec = Core.input.mouseWorld(cursorX, 0);
+        if(selectedBlock()){
+            vec.sub(block.offset, block.offset);
+        }
+        return World.toTile(vec.x);
+    }
+
+    int tileY(float cursorY){
+        Vec2 vec = Core.input.mouseWorld(0, cursorY);
+        if(selectedBlock()){
+            vec.sub(block.offset, block.offset);
+        }
+        return World.toTile(vec.y);
+    }
+
+    @Override
+    public void useSchematic(Schematic schem, boolean checkHidden){
+        block = null;
+        schematicX = tileX(getMouseX());
+        schematicY = tileY(getMouseY());
+
+        selectPlans.clear();
+        selectPlans.addAll(schematics.toPlans(schem, schematicX, schematicY, false));
+        mode = none;
     }
 
     public void buildInput() {

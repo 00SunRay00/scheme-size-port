@@ -1,12 +1,15 @@
 package scheme.moded;
 
+import arc.Core;
 import arc.math.Angles;
 import arc.math.geom.Vec2;
 import arc.scene.ui.layout.Table;
 import arc.struct.Seq;
 import arc.util.Time;
 import mindustry.content.Blocks;
+import mindustry.core.World;
 import mindustry.entities.units.BuildPlan;
+import mindustry.game.Schematic;
 import mindustry.gen.Mechc;
 import mindustry.gen.Player;
 import mindustry.gen.Unit;
@@ -143,6 +146,13 @@ public class ModedMobileInput extends MobileInput implements ModedInputHandler, 
             unit.controlWeapons(true, false);
             player.shooting = unit.isShooting = false;
         }
+    }
+
+    @Override
+    public void useSchematic(Schematic schem, boolean checkHidden){
+        selectPlans.clear();
+        selectPlans.addAll(schematics.toPlans(schem, World.toTile(Core.camera.position.x), World.toTile(Core.camera.position.y), false));
+        lastSchematic = schem;
     }
 
     public void buildInput() {
