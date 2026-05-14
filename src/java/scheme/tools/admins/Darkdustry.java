@@ -14,6 +14,9 @@ import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
 import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import static arc.Core.*;
 import static mindustry.Vars.*;
 import static scheme.SchemeVars.*;
@@ -106,17 +109,6 @@ public class Darkdustry implements AdminsTools {
         } else
             RainbowTeam.add(target, t -> send("team", t.id, "#" + target.id));
     }
-
-    public void ban(Short time, String reason, Player target){
-        if (unusable()) return;
-        send("ban",getPlayerId(target),time+"d",reason);
-    }
-
-    public void ban(String reason, Player target){
-        if (unusable()) return;
-        send("ban",getPlayerId(target),reason);
-    }
-
     public void placeCore() {
         if (unusable()) return;
         if (player.buildOn() instanceof CoreBuild)
@@ -215,4 +207,5 @@ public class Darkdustry implements AdminsTools {
     private static String id(Block block) {
         return block == null ? "null" : String.valueOf(block.id);
     }
+
 }
