@@ -1,14 +1,15 @@
 package scheme.tools.admins;
 
-import arc.math.geom.Point2;
 import arc.math.geom.Position;
 import arc.struct.Seq;
-import arc.util.Log;
 import mindustry.entities.units.BuildPlan;
 import mindustry.game.Team;
 import mindustry.gen.Call;
 import mindustry.gen.Player;
 import mindustry.world.Block;
+import mindustry.world.blocks.environment.Floor;
+import mindustry.world.blocks.environment.Prop;
+import mindustry.world.blocks.environment.StaticWall;
 import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
 import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
@@ -106,6 +107,16 @@ public class Darkdustry implements AdminsTools {
             RainbowTeam.add(target, t -> send("team", t.id, "#" + target.id));
     }
 
+    public void ban(Short time, String reason, Player target){
+        if (unusable()) return;
+        send("ban",getPlayerId(target),time+"d",reason);
+    }
+
+    public void ban(String reason, Player target){
+        if (unusable()) return;
+        send("ban",getPlayerId(target),reason);
+    }
+
     public void placeCore() {
         if (unusable()) return;
         if (player.buildOn() instanceof CoreBuild)
@@ -151,9 +162,33 @@ public class Darkdustry implements AdminsTools {
         });
     }
 
+    public void edit(Floor floorPlace, Block blockPlace, Floor overlayPlace, Block buildingPlace, int sx, int sy) {
+        if (unusable()) return;
+        //fuck you ion too
+        final Block[] blockSet = {blockPlace};
+        tile.select((floor, block, overlay, building) -> {
+            blockSet[0] = buildingPlace == null ? blockSet[0] : buildingPlace;
+            sendPacket("schemesize.fill",
+                    blockSet[0] == null ? "null" : ""+ blockSet[0].id,
+                    0,
+                    floorPlace == null ? "null" : ""+floorPlace.id,
+                    overlayPlace == null ? "null" : ""+overlayPlace.id,
+                    sx, sy, 0, 0);
+        });
+    }
+
     public void flush(Seq<BuildPlan> plans) {
         if (unusable()) return;
-        ui.showInfoFade("@admins.notsupported");
+        plans.each(plan -> {
+            if (plan.block.isFloor() && !plan.block.isOverlay())
+                edit(plan.block.asFloor(), null, null, null, plan.x, plan.y);
+            else if (plan.block instanceof Prop || plan.block instanceof StaticWall)
+                edit(null, plan.block, null, null, plan.x, plan.y);
+            else if (plan.block.isOverlay())
+                edit(null, null, plan.block.asFloor(), null, plan.x, plan.y);
+            else if (plan.block instanceof Block)
+                edit(null, null, null, plan.block, plan.x, plan.y);
+        });
     }
 
     public boolean unusable() {
