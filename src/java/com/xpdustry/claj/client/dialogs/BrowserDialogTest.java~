@@ -1,0 +1,149 @@
+/**
+ * This file is part of CLaJ. The system that allows you to play with your friends, 
+ * just by creating a room, copying the link and sending it to your friends.
+ * Copyright (c) 2026  Xpdustry
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.xpdustry.claj.client.dialogs;
+
+import arc.func.Cons;
+import arc.math.Mathf;
+import arc.struct.Seq;
+import arc.util.Time;
+
+import mindustry.core.Version;
+
+import com.xpdustry.claj.api.ClajLink;
+import com.xpdustry.claj.api.ClajRoom;
+import com.xpdustry.claj.client.ClajServers;
+import com.xpdustry.claj.common.status.*;
+
+
+/** @deprecated testing only. */
+@Deprecated
+public class BrowserDialogTest {
+  // Debug methods mocking Claj API
+  
+  void mockRefreshOnline(Runnable done, Cons<Throwable> failed) {
+      Time.runTask(40f, () -> {
+          // Reset and fill with mock data
+          ClajServers.online.clear();
+          ClajServers.online.put("Test Suite", "test.suite:2222");
+          ClajServers.online.put("Offline Server", "offline.host:0000");
+          ClajServers.online.put("Incompatible Server", "bad.ver:1111");
+          ClajServers.online.put("Official Server", "official.host:6567");
+          ClajServers.online.put("Empty Server", "empty.host:7000");
+          
+          done.run();
+      });
+  }
+
+  void mockPingHost(String host, int port, Cons<ServerState> success, Cons<Exception> failed) {
+      // Simulate latency
+      Time.runTask(30f, () -> {
+          if (host.contains("offline")) {
+              failed.get(new java.net.SocketTimeoutException("Fake timeout"));
+              return;
+          }
+          
+          if (host.contains("bad.ver")) {
+              // Fake incompatible version
+              success.get(new ServerState(host, port, 1, 100));
+              return;
+          }
+
+          // Normal success
+          success.get(new ServerState(host, port, 4, 45));
+      });
+  }
+
+  void mockServerRooms(String host, int port, Cons<Seq<ClajRoom>> rooms, Cons<Exception> failed) {
+      Time.runTask(45f, () -> {
+          if (host.contains("offline")) {
+              failed.get(new java.net.SocketTimeoutException("Fake timeout"));
+              return;
+          }
+
+          Seq<ClajRoom> list = new Seq<>();
+          
+          if (host.contains("test.suite")) {    
+              list.add(makeDebugRoom("Normal Room", "Ground Zero", "survival", 1, 1, 10));
+              list.add(makeDebugRoom("Room name that is really long and might break things if not handled properly in the UI layout", 
+                  "Map", "survival", 5, 5, 10));
+              list.add(makeDebugRoom("Map Test", 
+                  "Map name that is also surprisingly lengthy for a simple game map and should wrap or ellipsize", 
+                  "survival", 10, 2, 10));
+              list.add(makeDebugRoom("Mode Test", "Box", 
+                  "A custom gamemode name that goes on forever and ever without stopping", 
+                  999999999, 3, 10));
+              
+              ClajRoom oldVer = makeDebugRoom("Old Version", "Old Map", "sandbox", 1, 1, 10);
+              oldVer.state = new GameState(oldVer.state.name(), oldVer.state.mapname(), 0, 0, 10, 
+                  126, "v6", oldVer.state.mode(), oldVer.state.modeName()); 
+              list.add(oldVer);
+              
+              ClajRoom futureVer = makeDebugRoom("Future Version", "Future Map", "pvp", 1, 1, 10);
+              futureVer.state = new GameState(futureVer.state.name(), futureVer.state.mapname(), 0, 0, -1,
+                  200, "official", futureVer.state.mode(), futureVer.state.modeName());
+              list.add(futureVer);
+              
+              ClajRoom unknownVer = makeDebugRoom("Unknown Version", "Map", "attack", 1, 1, 10);
+              unknownVer.state = new GameState(unknownVer.state.name(), unknownVer.state.mapname(), 0, 0, 10,
+                  -1, "custom", unknownVer.state.mode(), unknownVer.state.modeName());
+              list.add(unknownVer);
+              
+              ClajRoom currentVer = makeDebugRoom("Current Version", "Current Map", "survival", 1, 1, 10);
+              currentVer.state = new GameState(currentVer.state.name(), currentVer.state.mapname(), 0, 0, 10,
+                  154, "official", currentVer.state.mode(), currentVer.state.modeName());
+              list.add(currentVer);
+
+              list.add(makeDebugRoom("Full Room", "Arena", "pvp", 50, 16, 16));
+              list.add(makeDebugRoom());
+              list.add(makeDebugRoom("High Capacity", "Big Map", "survival", 100, 120, -1));
+              
+          } else if (host.contains("official.host")) {
+              // Default debug rooms
+              list.add(makeDebugRoom("Standard Room", "Serpulo", "survival", 10, 5, 10));
+              list.add(makeDebugRoom("Protected Room", "Mountains", "attack", 5, 2, 8));
+              list.get(1).isProtected = true;
+              list.add(makeDebugRoom());
+              ClajRoom room = new ClajRoom(Mathf.rand.nextLong());
+              room.link = new ClajLink("aaa.com", 0, "mmmmmmmmmmm=");
+              room.isProtected = true;
+              list.add(room);ClajRoom room2 = new ClajRoom(Mathf.rand.nextLong());
+              room2.link = new ClajLink("aaa.com", 0, "mmmmmmmmmmm=");
+              list.add(room2);
+          }
+          
+          rooms.get(list);
+      });
+  }
+  ClajRoom makeDebugRoom() {
+    ClajRoom room = new ClajRoom(Mathf.rand.nextLong());
+    room.link = new ClajLink("debug.com", 1234, room.roomId);
+    return room;
+  }
+
+  ClajRoom makeDebugRoom(String name, String map, String mode, int wave, int players, int limit) {
+      ClajRoom room = new ClajRoom(Mathf.rand.nextLong());
+      room.link = new ClajLink("debug.com", 1234, room.roomId);
+      room.isPublic = true;
+      room.isProtected = Mathf.randomBoolean();
+      room.state = new GameState(name, map, wave, players, limit, Version.build, Version.type, 
+          MindustryGamemode.survival, mode.equals("survival") ? null : mode);
+      return room;
+  }
+}

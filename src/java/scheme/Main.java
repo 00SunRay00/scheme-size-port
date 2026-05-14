@@ -7,13 +7,13 @@ import mindustry.game.EventType;
 import mindustry.mod.Mod;
 import mindustry.mod.Scripts;
 import mindustry.ui.CoreItemsDisplay;
-import scheme.claj.client.dialogs.*;
 import scheme.input.SBinding;
 import scheme.moded.ModedSchematics;
 import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
 import scheme.tools.UpdateContent;
 import scheme.ui.MapResizeFix;
+import com.xpdustry.claj.client;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -36,7 +36,6 @@ public class Main extends Mod {
 
     @Override
     public void init() {
-        // Инициализация Scheme
         ServerIntegration.load();
         SchemeVars.load();
         SchemeUpdater.load();
@@ -44,6 +43,7 @@ public class Main extends Mod {
         MessageQueue.load();
         RainbowTeam.load();
         SBinding.load();
+        com.xpdustry.claj.client.Main.init();
 
         ui.schematics = schemas;
         ui.listfrag = listfrag;
@@ -85,14 +85,6 @@ public class Main extends Mod {
         }
 
         UpdateContent.update();
-
-        try {
-            new JoinViaClajDialog();
-            new CreateClajRoomDialog();
-            log("Claj dialogs initialized.");
-        } catch (Throwable e) {
-            error(new RuntimeException("Failed to initialize Claj dialogs", e));
-        }
     }
 
     public static void log(String info) {
@@ -108,6 +100,4 @@ public class Main extends Mod {
         app.setClipboardText(text);
         ui.showInfoFade("@copied");
     }
-    /** @return the mod version, using this class, or {@code null} if mod is not loaded yet. */
-    public static String getVersion() {return "2.3.3";}
 }

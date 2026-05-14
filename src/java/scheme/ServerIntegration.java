@@ -46,6 +46,9 @@ public class ServerIntegration {
             SSUsers.put(target.id, args);
             Call.clientPacketReliable("Subtitles", JsonIO.write(SSUsers));
         });
+        netServer.addBinaryPacketHandler("schemesize.available", (player, data) -> {
+            Call.clientBinaryPacketReliable(player.con, "schemesize.available", data);
+        });
 
         // endregion
         // region Client
@@ -61,6 +64,30 @@ public class ServerIntegration {
         netClient.addPacketHandler("Subtitles", args -> {
             SSUsers = JsonIO.read(IntMap.class, args);
             hasData = true;
+        });
+
+        netClient.addBinaryPacketHandler("schemesize.available", (player, data) -> {
+            
+        });
+                Events.on(WorldLoadEndEvent.class, e -> {
+
+            Runnable[] task = new Runnable[1];
+
+            task[0] = () -> {
+                if(!state.isGame()){
+                    Time.runTask(60f, task[0]);
+                    return;
+                }
+
+                Core.app.post(() -> {
+                    Call.serverBinaryPacketReliable(
+                        "schemesize.available",
+                        new byte[]{0}
+                    );
+                });
+            };
+
+            task[0].run();
         });
 
         // endregion
