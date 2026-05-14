@@ -1,7 +1,6 @@
 package scheme.tools.admins;
 
 import arc.math.geom.Geometry;
-import arc.math.geom.Point2;
 import arc.math.geom.Position;
 import arc.struct.Seq;
 import mindustry.Vars;
@@ -14,6 +13,7 @@ import mindustry.gen.Groups;
 import mindustry.gen.Player;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.environment.Prop;
 import mindustry.world.blocks.environment.StaticWall;
 import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
@@ -166,13 +166,16 @@ public class Internal implements AdminsTools {
 
     private static void edit(Block floor, Block block, Block overlay, Block building, int x, int y) {
         Tile tile = world.tile(x, y);
+        Floor tileFloor = tile.floor();
         if (tile == null) return;
 
         if ((floor != null && tile.floor() != floor) || (overlay != null && tile.overlay() != overlay))
             if(overlay!=null) tile.setFloor(Blocks.water.asFloor());
-            tile.setFloorNet(floor == null ? tile.floor() : floor, overlay == null ? tile.overlay() : overlay);
+            tile.setFloorNet(floor == null ? tileFloor : floor, overlay == null ? tile.overlay() : overlay);
 
         if (block != null && tile.block() != block) tile.setNet(block);
-        if (building != null && tile.block() != building) tile.setNet(building, player.team(), 0);
+        if (building != null && tile.block() != building && building != Blocks.removeOre && building != Blocks.removeWall) tile.setNet(building, player.team(), 0);
+        if(building == Blocks.removeWall && !tile.block().hasBuilding()) tile.setNet(Blocks.air, player.team(), 0);
+        if(building == Blocks.removeOre) tile.setFloorNet(tileFloor, null);
     }
 }

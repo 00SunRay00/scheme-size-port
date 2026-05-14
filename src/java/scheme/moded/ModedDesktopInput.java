@@ -200,7 +200,7 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
         schematicY = tileY(getMouseY());
 
         selectPlans.clear();
-        selectPlans.addAll(schematics.toPlans(schem, schematicX, schematicY, false));
+        selectPlans.addAll(m_schematics.toPlans(schem, schematicX, schematicY));
         mode = none;
     }
 

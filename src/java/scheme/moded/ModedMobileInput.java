@@ -151,7 +151,7 @@ public class ModedMobileInput extends MobileInput implements ModedInputHandler, 
     @Override
     public void useSchematic(Schematic schem, boolean checkHidden){
         selectPlans.clear();
-        selectPlans.addAll(schematics.toPlans(schem, World.toTile(Core.camera.position.x), World.toTile(Core.camera.position.y), false));
+        selectPlans.addAll(m_schematics.toPlans(schem, World.toTile(Core.camera.position.x), World.toTile(Core.camera.position.y)));
         lastSchematic = schem;
     }
 
