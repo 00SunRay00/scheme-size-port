@@ -69,6 +69,8 @@ public interface AdminsTools {
         });
     }
 
+    default void ban(Short time,String reason,Player target){}
+
     default void look() {
         for (int i = 0; i < 10; i++) player.unit().lookAt(input.mouseWorld());
     }

@@ -41,6 +41,8 @@ dependencies {
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
+    implementation files("libs/claj-client.jar")
+
     compileOnly "com.github.bsideup:jabel:$jabelVersion"
     annotationProcessor "com.github.bsideup:jabel:$jabelVersion"
 }
@@ -51,6 +53,7 @@ tasks.jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     from(rootDir) {
         include 'mod.hjson'

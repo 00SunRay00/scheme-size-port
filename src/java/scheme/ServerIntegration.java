@@ -1,11 +1,12 @@
 package scheme;
 
+import arc.Core;
 import arc.Events;
 import arc.struct.IntMap;
 import arc.util.Strings;
+import arc.util.Time;
 import mindustry.game.EventType.*;
 import mindustry.gen.Call;
-import mindustry.gen.Player;
 import mindustry.io.JsonIO;
 
 import static arc.Core.*;
@@ -66,7 +67,7 @@ public class ServerIntegration {
             hasData = true;
         });
 
-        netClient.addBinaryPacketHandler("schemesize.available", (player, data) -> {
+        netClient.addBinaryPacketHandler("schemesize.available", (data) -> {
             
         });
                 Events.on(WorldLoadEndEvent.class, e -> {

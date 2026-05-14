@@ -13,7 +13,6 @@ import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
 import scheme.tools.UpdateContent;
 import scheme.ui.MapResizeFix;
-import com.xpdustry.claj.client;
 
 import static arc.Core.*;
 import static mindustry.Vars.*;
@@ -43,7 +42,7 @@ public class Main extends Mod {
         MessageQueue.load();
         RainbowTeam.load();
         SBinding.load();
-        com.xpdustry.claj.client.Main.init();
+        new com.xpdustry.claj.client.Main().init();
 
         ui.schematics = schemas;
         ui.listfrag = listfrag;
