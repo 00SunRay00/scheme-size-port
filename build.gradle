@@ -4,9 +4,10 @@ plugins {
 
 version = '1.0'
 
-java {
+compileJava {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_1_8
+    options.compilerArgs += ["-Xlint:-options", "-Xlint:unchecked", "--enable-preview"]
 }
 
 base {
@@ -34,14 +35,12 @@ ext {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs.addAll(['--release', '8'])
+    options.release = 21
 }
 
 dependencies {
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-
-    implementation files("libs/claj-client.jar")
 
     compileOnly "com.github.bsideup:jabel:$jabelVersion"
     annotationProcessor "com.github.bsideup:jabel:$jabelVersion"
@@ -51,7 +50,7 @@ tasks.jar {
     archiveFileName = "${base.archivesName.get()}Desktop.jar"
 
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it)}
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
@@ -84,7 +83,7 @@ tasks.register("jarAndroid") {
 
         def d8 = isWindows ? "d8.bat" : "d8"
 
-        "$d8 $dependencies --min-api 14 --output ${base.archivesName.get()}Android.jar ${base.archivesName.get()}Desktop.jar"
+        "$d8 $dependencies --min-com.xpdustry.claj.api 14 --output ${base.archivesName.get()}Android.jar ${base.archivesName.get()}Desktop.jar"
                 .execute(null, new File("build/libs"))
                 .waitForProcessOutput(System.out, System.err)
     }
