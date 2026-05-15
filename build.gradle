@@ -4,10 +4,9 @@ plugins {
 
 version = '1.0'
 
-compileJava {
+java {
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_1_8
-    options.compilerArgs += ["-Xlint:-options", "-Xlint:unchecked", "--enable-preview"]
 }
 
 base {
@@ -35,7 +34,7 @@ ext {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.release = 8
+    options.compilerArgs.addAll(['--release', '8'])
 }
 
 dependencies {
@@ -50,9 +49,8 @@ tasks.jar {
     archiveFileName = "${base.archivesName.get()}Desktop.jar"
 
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it)}
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
     from(rootDir) {
         include 'mod.hjson'
@@ -83,7 +81,7 @@ tasks.register("jarAndroid") {
 
         def d8 = isWindows ? "d8.bat" : "d8"
 
-        "$d8 $dependencies --min-com.xpdustry.claj.api 14 --output ${base.archivesName.get()}Android.jar ${base.archivesName.get()}Desktop.jar"
+        "$d8 $dependencies --min-api 14 --output ${base.archivesName.get()}Android.jar ${base.archivesName.get()}Desktop.jar"
                 .execute(null, new File("build/libs"))
                 .waitForProcessOutput(System.out, System.err)
     }
