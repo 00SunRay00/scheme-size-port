@@ -156,7 +156,7 @@ public class Darkdustry implements AdminsTools {
 
     public void edit(Floor floorPlace, Block blockPlace, Floor overlayPlace, Block buildingPlace, int sx, int sy) {
         if (unusable()) return;
-        //fuck you ion too
+        //fuck you too, ion
         final Block[] blockSet = {blockPlace};
         tile.select((floor, block, overlay, building) -> {
             blockSet[0] = buildingPlace == null ? blockSet[0] : buildingPlace;

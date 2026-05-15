@@ -166,8 +166,8 @@ public class Internal implements AdminsTools {
 
     private static void edit(Block floor, Block block, Block overlay, Block building, int x, int y) {
         Tile tile = world.tile(x, y);
-        Floor tileFloor = tile.floor();
         if (tile == null) return;
+        Floor tileFloor = tile.floor();
 
         if ((floor != null && tile.floor() != floor) || (overlay != null && tile.overlay() != overlay))
             if(overlay!=null) tile.setFloor(Blocks.water.asFloor());
