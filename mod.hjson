@@ -14,6 +14,7 @@ A mod that increases the schematic size limit to 512 blocks! Adds admins, render
    - Updater
    - Mobile Support
    - Admins Tools
+   - CLaJ v2
 
    - Building Tools
    - AI Power
@@ -22,14 +23,13 @@ A mod that increases the schematic size limit to 512 blocks! Adds admins, render
    - Schematic Shortcuts
    - Cursed Schematics
    - Advanced Dev Console
-   - Copy Link and Join
    - Rule setter
 "
 author: '''
 [#0096FF]xzxADIxzx
-Port: 00SunRay00
+Port: 00SunRay00 & RE2b2m22
 '''
-minGameVersion: 156
+minGameVersion: 157
 version: 2.0.1
 hidden: true
 main: scheme.Main

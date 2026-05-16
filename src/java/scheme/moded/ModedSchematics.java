@@ -25,6 +25,7 @@ import mindustry.input.Placement.NormalizeResult;
 import mindustry.io.*;
 import mindustry.world.Block;
 import mindustry.world.Tile;
+import mindustry.world.blocks.environment.Floor;
 import mindustry.world.blocks.legacy.LegacyBlock;
 import mindustry.core.Version;
 
@@ -230,9 +231,12 @@ public class ModedSchematics extends Schematics {
                 for (int y = y1; y <= y2; y++) {
                     Tile tile = world.tile(x, y);
                     if (tile == null) continue;
-
                     Block block = provider.get(tile);
-                    if (block != null) tiles.add(new Stile(block, x - x1, y - y1, null, (byte) 0));
+                    if (block != null) {
+                        Object config = tile.build != null ? tile.build.config() : null;
+                        byte rotation = tile.build != null ? (byte) tile.build.rotation : 0;
+                        tiles.add(new Stile(block, x - x1, y - y1, config, rotation));
+                    }
                 }
             }
 

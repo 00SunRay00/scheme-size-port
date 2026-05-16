@@ -15,7 +15,7 @@ base {
 
 sourceSets {
     main {
-        java.srcDirs = ['src/java']
+        java.srcDirs = ['src/java', 'src/java/api/src', 'src/java/client/src', 'src/java/common/src']
         resources.srcDirs = ['src/resources']
     }
 }
@@ -28,7 +28,7 @@ repositories {
 
 ext {
     mindustryVersion = 'v157.4'
-    jabelVersion = '1.0.1'
+    jabelVersion = '1.1.0'
     isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
     sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
 }
@@ -37,12 +37,14 @@ tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.addAll(['--release', '8'])
 }
 
+
 dependencies {
     compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Arc:arcnet:$mindustryVersion"
     compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
 
-    compileOnly "com.github.bsideup:jabel:$jabelVersion"
-    annotationProcessor "com.github.bsideup:jabel:$jabelVersion"
+    compileOnly files("libs/jabel-1.1.0.jar")
+    annotationProcessor files("libs/jabel-1.1.0.jar")
 }
 
 tasks.jar {
@@ -79,7 +81,13 @@ tasks.register("jarAndroid") {
                         [new File(platformRoot, "android.jar")]
         ).collect { "--classpath $it.path" }.join(" ")
 
-        def d8 = isWindows ? "d8.bat" : "d8"
+        def buildToolsDir = new File("$sdkRoot/build-tools/")
+                .listFiles()
+                .sort()
+                .reverse()
+                .first()
+
+        def d8 = new File(buildToolsDir, isWindows ? "d8.bat" : "d8").absolutePath
 
         "$d8 $dependencies --min-api 14 --output ${base.archivesName.get()}Android.jar ${base.archivesName.get()}Desktop.jar"
                 .execute(null, new File("build/libs"))
