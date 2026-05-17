@@ -1,0 +1,87 @@
+name: Bug Report
+description: Report a bug in Scheme Size mod
+labels: ["bug"]
+
+body:
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: On what platform does the bug occur?
+      multiple: false
+      options:
+        - Android
+        - iOS
+        - Windows
+        - Linux
+        - Mac
+    validations:
+      required: true
+
+  - type: input
+    id: mod-version
+    attributes:
+      label: Mod version
+      description: Version of Scheme Size you are using.
+      placeholder: "e.g. 2.0.3"
+    validations:
+      required: true
+
+  - type: input
+    id: mindustry-version
+    attributes:
+      label: Mindustry version
+      description: Build number from the main menu.
+      placeholder: "e.g. 157"
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: Bug description
+      description: Explain the bug in detail. What happened and what did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Exact steps to reproduce the bug.
+      placeholder: |
+        1. Open...
+        2. Click...
+        3. See error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Crash logs
+      description: If the game crashed, attach logs from Settings -> Game Data -> Export Crash logs.
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots
+      description: If applicable, add screenshots to help explain the problem.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I am using the latest version of Scheme Size
+          required: true
+        - label: I have confirmed this bug is caused by Scheme Size, not vanilla Mindustry or other mods
+          required: true
+        - label: I have searched existing issues to make sure this is not a duplicate
+          required: true
+        - label: I have tested with other mods disabled
+          required: true
