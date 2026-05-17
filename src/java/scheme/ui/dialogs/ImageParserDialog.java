@@ -32,12 +32,12 @@ public class ImageParserDialog extends BaseDialog {
 
         cont.table(t -> image = t).row();
 
-        new TextSlider(1, 10, 1, 1, value -> {
+        new TextSlider(1, 16, 1, 1, value -> {
             app.post(this::rebuild);
             return bundle.format("parser.row", config.rows = value);
         }).build(cont).width(450f).row();
 
-        new TextSlider(1, 10, 1, 1, value -> {
+        new TextSlider(1, 16, 1, 1, value -> {
             app.post(this::rebuild);
             return bundle.format("parser.column", config.columns = value);
         }).build(cont).width(450f).row();

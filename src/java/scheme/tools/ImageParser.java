@@ -7,11 +7,13 @@ import arc.graphics.Pixmaps;
 import arc.math.geom.Point2;
 import arc.struct.Seq;
 import arc.struct.StringMap;
+import arc.util.Nullable;
 import arc.util.Strings;
 import mindustry.content.Blocks;
 import mindustry.game.Schematic;
 import mindustry.game.Schematic.Stile;
 import mindustry.logic.LExecutor;
+import mindustry.world.Block;
 import mindustry.world.blocks.logic.LogicBlock;
 import mindustry.world.blocks.logic.LogicDisplay;
 import mindustry.world.blocks.logic.LogicBlock.LogicLink;
@@ -19,6 +21,7 @@ import mindustry.world.blocks.logic.LogicBlock.LogicLink;
 import static mindustry.Vars.*;
 
 import com.github.bsideup.jabel.Desugar;
+import mindustry.world.blocks.logic.TileableLogicDisplay;
 
 public class ImageParser {
 
@@ -53,14 +56,14 @@ public class ImageParser {
         Seq<Point2> available = new Seq<>(); // sequence of all positions available to the processor
 
         Seq<Stile> tiles = new Seq<>();
-        for (int row = 0; row < cfg.rows; row++) {
-            for (int column = 0; column < cfg.columns; column++) {
+        for (short row = 0; row < cfg.rows; row++) {
+            for (short column = 0; column < cfg.columns; column++) {
 
                 int x = column * size - cfg.offset(), y = row * size - cfg.offset();
                 tiles.add(new Stile(cfg.display, x, y, null, (byte) 0));
 
                 Display block = new Display(image, column * pixels, row * pixels, pixels);
-                for (String code : parseCode(block).split(processorSeparator)) {
+                for (String code : parseCode(block,column,row,cfg).split(processorSeparator)) {
 
                     var pos = next(available, x, y, cfg.range());
                     if (pos == null) refill(available, layer++, width, height);
@@ -89,7 +92,7 @@ public class ImageParser {
     }
 
     /** Converts a display into a sequence of instructions for a logical processor. */
-    public static String parseCode(Display display) {
+    public static String parseCode(Display display, Short column, Short row, Config cfg) {
         StringBuilder code = new StringBuilder();
 
         Color last = null;
@@ -102,7 +105,7 @@ public class ImageParser {
                 instructions++;
             }
 
-            code.append(rect.rectCode());
+            code.append(rect.rectCode(cfg.display,column,row));
             instructions++;
 
             if (instructions + 2 >= LExecutor.maxInstructions) {
@@ -209,7 +212,8 @@ public class ImageParser {
             );
         }
 
-        public String rectCode() {
+        public String rectCode(Block display, Short column, Short row) {
+            if(display instanceof TileableLogicDisplay) return Strings.format("draw rect @ @ @ 1\n", x+column*((TileableLogicDisplay) display).displaySize, y+row*((TileableLogicDisplay) display).displaySize, length);
             return Strings.format("draw rect @ @ @ 1\n", x, y, length);
         }
     }
