@@ -1,0 +1,48 @@
+name: Feature Request
+description: Suggest a new feature for Scheme Size
+labels: ["enhancement"]
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Feature description
+      description: Describe the feature you would like to see added.
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why is this needed?
+      description: Explain why this feature would be useful. What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: How should it work?
+      description: If you have a vision for how this should work, describe it here.
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered any alternative solutions or workarounds?
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: This feature is related to Scheme Size mod, not to Mindustry core
+          required: true
+        - label: I have searched existing issues to make sure this is not a duplicate
+          required: true
+        - label: This feature does not already exist in the latest version
+          required: true
