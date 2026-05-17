@@ -58,9 +58,7 @@ public class Main extends Mod {
         corefrag.build(ui.hudGroup);
 
         control.setInput(m_input.asHandler());
-        if (SchemeUpdater.installed("mi2-utilities-java")) {
-            Events.on(EventType.ClientLoadEvent.class, e -> control.setInput(m_input.asHandler()));
-        }
+        Events.on(EventType.ClientLoadEvent.class, e -> control.setInput(m_input.asHandler()));
         renderer.addEnvRenderer(0, render::draw);
 
         if (m_schematics.requiresDialog) ui.showOkText("@rename.name", "@rename.text", () -> {});
