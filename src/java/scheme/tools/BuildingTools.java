@@ -70,6 +70,7 @@ public class BuildingTools {
     }
 
     private void drop(Tile tile, Item item) {
+        if (player == null || player.unit() == null) return;
         Call.requestItem(player, tile.build, item, units.maxAccepted);
         if (player.unit().stack.amount > 0) Call.dropItem(units.maxAccepted);
     }
