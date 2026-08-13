@@ -64,6 +64,9 @@ public class Mindurka implements AdminsTools {
     public void manageTeamRuleStr(int teamId, String value, String name) {
     }
 
+    public void manageRuleObjectSet(String fieldName, arc.struct.ObjectSet<?> value) {
+    }
+
     public void manageUnit() {
         if (unusable()) return;
         unit.select(false, true, false, (target, team, unit, amount) -> {

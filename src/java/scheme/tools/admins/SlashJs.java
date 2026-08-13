@@ -34,12 +34,36 @@ public class SlashJs implements AdminsTools {
 
     public void manageTeamRuleBool(int teamId, boolean value, String name) {
         if (unusable()) return;
-        send("var tr = Vars.state.rules.teams.get(Team.all[" + teamId + "], () => new Rules.TeamRule()); tr." + name + " = " + value + "; Call.setRules(Vars.state.rules);");
+        send("var tr = Vars.state.rules.teams.get(Team.all[" + teamId + "]); tr." + name + " = " + value + "; Call.setRules(Vars.state.rules);");
     }
 
     public void manageTeamRuleStr(int teamId, String value, String name) {
         if (unusable()) return;
-        send("var tr = Vars.state.rules.teams.get(Team.all[" + teamId + "], () => new Rules.TeamRule()); tr." + name + " = " + value + "; Call.setRules(Vars.state.rules);");
+        send("var tr = Vars.state.rules.teams.get(Team.all[" + teamId + "]); tr." + name + " = " + value + "; Call.setRules(Vars.state.rules);");
+    }
+
+    public void manageRuleObjectSet(String fieldName, arc.struct.ObjectSet<?> value) {
+        if (unusable()) return;
+        if (value.isEmpty()) {
+            send("Vars.state.rules." + fieldName + ".clear(); Call.setRules(Vars.state.rules);");
+            return;
+        }
+
+        var it = value.iterator();
+        if (it.hasNext()) {
+            Object first = it.next();
+            if (first instanceof mindustry.ctype.Content) {
+                int ordinal = ((mindustry.ctype.Content) first).getContentType().ordinal();
+                StringBuilder sb = new StringBuilder();
+                for (Object obj : value) {
+                    if (obj instanceof mindustry.ctype.Content) {
+                        if (sb.length() > 0) sb.append(",");
+                        sb.append(((mindustry.ctype.Content) obj).id);
+                    }
+                }
+                send("Vars.state.rules." + fieldName + ".clear(); [" + sb.toString() + "].forEach(id => Vars.state.rules." + fieldName + ".add(Vars.content.getByID(mindustry.ctype.ContentType.all[" + ordinal + "], id))); Call.setRules(Vars.state.rules);");
+            }
+        }
     }
 
     public void manageUnit() {
