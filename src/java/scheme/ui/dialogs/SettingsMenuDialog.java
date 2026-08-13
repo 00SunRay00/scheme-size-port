@@ -22,6 +22,7 @@ public class SettingsMenuDialog {
 //            table.checkPref("crashreports", true); in dev
             table.checkPref("hardscheme", false);
             table.checkPref("approachenabled", true);
+            table.checkPref("miniresources", false);
             table.checkPref("welcome", false); // no oce care
             table.checkPref("forceTapTile", false);
             table.checkPref("check4update", true);
