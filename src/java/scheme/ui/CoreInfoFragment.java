@@ -160,11 +160,15 @@ public class CoreInfoFragment {
         }
 
         public void rebuild(Team team) {
+            if (this.team != team) {
+                used.clear();
+            }
             this.team = team;
 
             clear();
             content.items().each(item -> {
                 if (!used.contains(item)) return;
+                if (settings.getBool("miniresources") && (display == null || display.get(item) <= 0)) return;
 
                 image(item.uiIcon).size(iconSmall).padRight(3f);
                 label(() -> display == null ? "0" : format(display.get(item))).padRight(3f).minWidth(52f).left();
@@ -188,7 +192,25 @@ public class CoreInfoFragment {
 
                 if (core == null) return;
 
-                if (content.items().contains(item -> core.get(item) > 0 && used.add(item))) rebuild(team);
+                boolean added = content.items().contains(item -> core.get(item) > 0 && used.add(item));
+                boolean visibilityChanged = false;
+                if (settings.getBool("miniresources")) {
+                    int activeCount = 0;
+                    for (Item item : content.items()) {
+                        if (used.contains(item) && core.get(item) > 0) {
+                            activeCount++;
+                        }
+                    }
+                    if (children.size != activeCount * 2) {
+                        visibilityChanged = true;
+                    }
+                } else {
+                    if (children.size != used.size * 2) {
+                        visibilityChanged = true;
+                    }
+                }
+
+                if (added || visibilityChanged) rebuild(team);
                 if (viewStats && timer.get(1, 30f)) updateStats(); // update resource stats only once every half second
             });
 

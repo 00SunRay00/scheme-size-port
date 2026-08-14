@@ -204,8 +204,6 @@ public class HudFragment {
             }).get().color.a(0f); // hide on startup
         });
 
-        if (!settings.getBool("mobilebuttons") && !mobile) return;
-
         getCommandButton(cont -> { // Shortcut and cursed schematics button
             if (!SchemeUpdater.installed("test-utils")) // hardcoded paddings
                 cont.row(); // for command button
@@ -230,7 +228,7 @@ public class HudFragment {
             cont.name = "mobilebuttons";
             cont.top().left();
 
-            cont.visible(() -> ui.hudfrag.shown && !ui.minimapfrag.shown());
+            cont.visible(() -> ui.hudfrag.shown && !ui.minimapfrag.shown() && (settings.getBool("mobilebuttons") || mobile));
 
             cont.table(Tex.buttonEdge4, pad -> {
                 partitionmb(pad, mode -> {
@@ -262,7 +260,17 @@ public class HudFragment {
                 pad.setHeight(Scl.scl(mobiles.fliped ? 190.8f : 63.8f));
             });
         });
+
+        Table info = getInfoTable();
+        if (info != null) info.update(() -> {
+            if (!settings.getBool("mobilebuttons") && !mobile) {
+                info.setTranslation(0f, 0f);
+                return;
+            }
+            info.setTranslation(0f, -Scl.scl(mobiles.fliped ? 190.8f : 63.8f));
+        });
     }
+
     private Cell<Table> partitionbt(Table table, Cons<Table> cons) {
         if (table.hasChildren()) table.image().color(Pal.gray).fillY().width(4f).pad(4f).visible(() -> building.fliped);
         return table.table(cont -> {
@@ -309,15 +317,22 @@ public class HudFragment {
             block[2] = ui.hudGroup.find("editor");
 
             if (block[0] != null) block[0] = block[0].parent.parent.parent;
+
+            Table info = getInfoTable();
+            if (info != null) info.update(() -> {
+                if (!settings.getBool("mobilebuttons") && !mobile) {
+                    info.setTranslation(0f, 0f);
+                    return;
+                }
+                info.setTranslation(0f, -Scl.scl(mobiles.fliped ? 190.8f : 63.8f));
+            });
         });
     }
 
     private Table getInfoTable() {
-        return (Table) ((Table) getWavesMain().getChildren().get(0)).getChildren().get(1);
-    }
-
-    private Stack getWavesMain() {
-        return (Stack) ((Table) ui.hudGroup.find("overlaymarker")).getChildren().get(mobile ? 3 : 0);
+        Element found = ui.hudGroup.find("infotable");
+        if (found instanceof Table) return (Table) found;
+        return null;
     }
 
     private ImageButton getSchematicsButton() {
@@ -348,7 +363,7 @@ public class HudFragment {
             cont.name = "shortcutbutton"; // it's here because there's no sense in renaming an already created table
             cont.bottom().left();
 
-            cont.visible(() -> ui.hudfrag.shown && !ui.minimapfrag.shown());
+            cont.visible(() -> ui.hudfrag.shown && !ui.minimapfrag.shown() && (settings.getBool("mobilebuttons") || mobile));
             cont.marginBottom(SchemeUpdater.installed("test-utils") ? 120f : 0f);
             cons.get(cont);
         });

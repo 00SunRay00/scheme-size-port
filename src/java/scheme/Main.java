@@ -8,6 +8,7 @@ import mindustry.mod.Mod;
 import mindustry.mod.Scripts;
 import mindustry.ui.CoreItemsDisplay;
 import scheme.input.SBinding;
+import scheme.moded.ModedGlyphLayout;
 import scheme.moded.ModedSchematics;
 import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
@@ -43,6 +44,7 @@ public class Main extends Mod {
         MessageQueue.load();
         RainbowTeam.load();
         SBinding.load();
+        ModedGlyphLayout.load();
         if(mods.getMod("claj") == null || !mods.getMod("claj").enabled())new com.xpdustry.claj.client.Main().init();
 
         ui.schematics = schemas;

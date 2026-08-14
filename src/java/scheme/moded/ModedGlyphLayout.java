@@ -51,6 +51,35 @@ public class ModedGlyphLayout extends GlyphLayout {
         colorStack.add(color);
         Pool<Color> colorPool = Pools.get(Color.class, Color::new);
 
+        int scan = 0;
+        while (scan < start) {
+            char c = str.charAt(scan);
+            if (c == '[') {
+                if (scan + 1 < end && str.charAt(scan + 1) == '[') {
+                    scan += 2;
+                    continue;
+                }
+                int length = Reflect.invoke(GlyphLayout.class, this, "parseColorMarkup", new Object[] {
+                        str, scan + 1, end, colorPool
+                }, CharSequence.class, int.class, int.class, Pool.class);
+                if (length >= 0) {
+                    int tagEnd = scan + length + 1;
+                    if (tagEnd >= start) {
+                        nextColor = colorStack.peek();
+                        start = tagEnd + 1;
+                        break;
+                    }
+                    nextColor = colorStack.peek();
+                    scan = tagEnd + 1;
+                } else {
+                    scan++;
+                }
+            } else {
+                scan++;
+            }
+        }
+
+        color = nextColor;
         int runStart = start;
         int skip = 0;
 

@@ -78,6 +78,17 @@ public class Internal implements AdminsTools {
         }
     }
 
+    public void manageRuleObjectSet(String fieldName, arc.struct.ObjectSet<?> value) {
+        if (unusable()) return;
+        try {
+            Field fiel = Rules.class.getField(fieldName);
+            fiel.set(Vars.state.rules, value);
+            Call.setRules(Vars.state.rules);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private void setFieldValue(Field fiel, Object target, String value) throws Exception {
         Class<?> type = fiel.getType();
         if (type == float.class) {

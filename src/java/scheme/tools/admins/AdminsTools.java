@@ -46,6 +46,8 @@ public interface AdminsTools {
 
     void manageTeamRuleStr(int teamId, String value, String name);
 
+    void manageRuleObjectSet(String fieldName, arc.struct.ObjectSet<?> value);
+
     void manageUnit();
 
     void spawnUnits();

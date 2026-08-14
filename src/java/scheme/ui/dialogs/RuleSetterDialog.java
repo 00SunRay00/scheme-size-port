@@ -287,7 +287,7 @@ public class RuleSetterDialog extends BaseDialog {
                     pane.button(new TextureRegionDrawable(item.uiIcon), Styles.clearTogglei, iconSize, () -> {
                         if (banned.contains(item)) banned.remove(item);
                         else banned.add(item);
-                        syncRules();
+                        syncRules(key, banned);
                     }).size(iconSize + 8f).tooltip(item.localizedName).update(b -> b.setChecked(banned.contains(item)));
                     if (++count[0] % columns == 0) pane.row();
                 });
@@ -297,36 +297,57 @@ public class RuleSetterDialog extends BaseDialog {
         t.row();
     }
 
-    private void syncRules() {
+    private void syncRules(String fieldName, ObjectSet<?> banned) {
         try {
-            Call.setRules(Vars.state.rules);
+            admins.manageRuleObjectSet(fieldName, banned);
             rebuild();
         } catch (Exception ignored) {}
     }
 
     private void apply(String field, boolean value) {
+        try {
+            Rules.class.getField(field).setBoolean(Vars.state.rules, value);
+        } catch (Exception ignored) {}
         admins.manageRuleBool(value, field);
         rebuild();
     }
 
     private void applyFloat(String field, float value) {
+        try {
+            Rules.class.getField(field).setFloat(Vars.state.rules, value);
+        } catch (Exception ignored) {}
         admins.manageRuleStr(String.valueOf(value), field);
     }
 
     private void applyInt(String field, int value) {
+        try {
+            Rules.class.getField(field).setInt(Vars.state.rules, value);
+        } catch (Exception ignored) {}
         admins.manageRuleStr(String.valueOf(value), field);
     }
 
     private void applyTeam(int teamId, String field, boolean value) {
+        try {
+            Rules.TeamRule tr = Vars.state.rules.teams.get(Team.all[teamId]);
+            Rules.TeamRule.class.getField(field).setBoolean(tr, value);
+        } catch (Exception ignored) {}
         admins.manageTeamRuleBool(teamId, value, field);
         rebuild();
     }
 
     private void applyTeamFloat(int teamId, String field, float value) {
+        try {
+            Rules.TeamRule tr = Vars.state.rules.teams.get(Team.all[teamId]);
+            Rules.TeamRule.class.getField(field).setFloat(tr, value);
+        } catch (Exception ignored) {}
         admins.manageTeamRuleStr(teamId, String.valueOf(value), field);
     }
 
     private void applyTeamInt(int teamId, String field, int value) {
+        try {
+            Rules.TeamRule tr = Vars.state.rules.teams.get(Team.all[teamId]);
+            Rules.TeamRule.class.getField(field).setInt(tr, value);
+        } catch (Exception ignored) {}
         admins.manageTeamRuleStr(teamId, String.valueOf(value), field);
     }
 
