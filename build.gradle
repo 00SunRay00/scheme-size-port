@@ -28,12 +28,12 @@ sourceSets {
 
 repositories {
     mavenCentral()
-    maven { url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
+    maven { url "https://raw.githubusercontent.com/00SunRay00/MindustryRepo/master/repository" }
     maven { url "https://jitpack.io" }
 }
 
 ext {
-    mindustryVersion = 'v159'
+    mindustryVersion = 'v159.7'
     jabelVersion = '1.1.0'
     isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
     sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
