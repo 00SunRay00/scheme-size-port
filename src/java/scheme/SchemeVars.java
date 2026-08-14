@@ -56,6 +56,7 @@ public class SchemeVars {
     public static HudFragment hudfrag;
     public static PlayerListFragment listfrag;
     public static ShortcutFragment shortfrag;
+    public static ConsoleFragment consolefrag;
     public static CoreInfoFragment corefrag;
 
     public static ServerUtils serverUtils;
@@ -133,6 +134,7 @@ public class SchemeVars {
         hudfrag = new HudFragment();
         listfrag = new PlayerListFragment();
         shortfrag = new ShortcutFragment();
+        consolefrag = new ConsoleFragment();
         corefrag = new CoreInfoFragment();
 
         serverUtils = new ServerUtils();

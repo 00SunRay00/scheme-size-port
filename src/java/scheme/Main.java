@@ -58,6 +58,7 @@ public class Main extends Mod {
         hudfrag.build(ui.hudGroup);
         listfrag.build(ui.hudGroup);
         shortfrag.build(ui.hudGroup);
+        consolefrag.build();
         corefrag.build(ui.hudGroup);
 
         control.setInput(m_input.asHandler());
