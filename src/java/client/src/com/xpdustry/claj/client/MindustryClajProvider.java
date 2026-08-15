@@ -69,7 +69,7 @@ public class MindustryClajProvider implements ClajProvider {
     mindustryServer = Reflect.get(mindustryProvider, "server"); // Safe, we already know that is ArcNetProvider
     mindustryServerDispatcher = Reflect.get(mindustryServer, "dispatchListener"); // Safe, never changed
     mindustrySerializer = new PacketSerializer();
-    clajVersion = ClajVersion.of(Main.getMeta().version);
+    clajVersion = ClajVersion.of("2.4.2");
     implType = ClajType.of("Mindustry");
 
     // Hook Connect listener, so that magic join packet is send before ConnectPacket

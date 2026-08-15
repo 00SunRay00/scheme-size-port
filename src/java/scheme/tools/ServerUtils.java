@@ -13,8 +13,8 @@ public class ServerUtils {
         Events.on(EventType.ClientServerConnectEvent.class, event -> lastServer = event.ip + ":" + event.port);
     }
 
-    public Boolean serverNameEqual(String name){
-        if(!Vars.net.client() || lastServer == null) return null;
+    public boolean serverNameEqual(String name){
+        if(!Vars.net.client() || lastServer == null) return false;
 
         try{
             JsonValue servers = new JsonReader().parse(Vars.serverCacheFile);
@@ -22,11 +22,11 @@ public class ServerUtils {
                 String ip = server.getString("ip", "");
                 int port = server.getInt("port", Vars.port);
                 if(lastServer.equals(ip + ":" + port)){
-                    return server.getString("name", null).equals(name);
+                    return name.equals(server.getString("name", null));
                 }
             }
         }catch(Exception ignored){}
 
-        return null;
+        return false;
     }
 }

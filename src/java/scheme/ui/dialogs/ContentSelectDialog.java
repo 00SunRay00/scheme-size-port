@@ -72,7 +72,7 @@ public class ContentSelectDialog<T extends UnlockableContent> extends ListDialog
         addTeam();
     }
 
-    public ContentSelectDialog(String title, Seq<T> content, Boolean turn, Seq<Object> contain){
+    public ContentSelectDialog(String title, Seq<T> content, boolean turn, Seq<Object> contain){
         super(title);
 
         Table table = new Table();

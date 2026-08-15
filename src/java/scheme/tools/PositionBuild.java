@@ -4,7 +4,7 @@ import arc.math.geom.Point2;
 import arc.math.geom.Position;
 
 public class PositionBuild {
-    public static Position GetPosition(Float x, Float y) {
+    public static Position GetPosition(float x, float y) {
         return new Position() {
             @Override
             public float getX() {
