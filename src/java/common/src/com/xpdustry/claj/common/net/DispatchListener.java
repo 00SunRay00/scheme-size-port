@@ -42,9 +42,8 @@ public class DispatchListener implements NetListener {
   public synchronized void addListener(NetListener listener) {
     if(listener == null) throw new IllegalArgumentException("listener cannot be null.");
     if (Structs.contains(listeners, listener)) return;
-    // listeners are always inserted at the start instead of the end. Idk why...
-    //listeners = Structs.add(listeners, listener);
-    listeners = Structs.insert(listeners, 0, listener);
+    listeners = Structs.add(listeners, listener);
+    //listeners = Structs.insert(listeners, 0, listener);
   }
 
   public synchronized void removeListener(NetListener listener) {

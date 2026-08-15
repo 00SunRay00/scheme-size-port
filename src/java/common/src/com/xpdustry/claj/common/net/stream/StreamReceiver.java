@@ -27,7 +27,7 @@ import com.xpdustry.claj.common.packets.Packet;
 
 //TODO: clear unfinished streams after one minute.
 public class StreamReceiver {
-  public static final int MAX_SIMULTANEOUS_STREAMS = 8;
+  public static final int MAX_STREAMS = 8;
 
   protected static IntMap<IntMap<StreamBuilder>> sbuilders;
   protected static IntMap<StreamBuilder> cbuilders;
@@ -38,13 +38,12 @@ public class StreamReceiver {
    * @throws RuntimeException if a chunk was received before his head.
    */
   public static Packet received(StreamPacket packet) {
-    if (cbuilders == null) cbuilders = new IntMap<>(MAX_SIMULTANEOUS_STREAMS);
+    if (cbuilders == null) cbuilders = new IntMap<>(MAX_STREAMS);
 
     if (packet instanceof StreamHead begin) {
       if (begin.total >= StreamHead.MAX_STREAM_SIZE)
         throw new RuntimeException("Stream is too big; " + begin.total + ">=" + StreamHead.MAX_STREAM_SIZE);
-      if (cbuilders.size >= MAX_SIMULTANEOUS_STREAMS)
-        throw new RuntimeException("Too many simultaneous streams; " + cbuilders.size + ">=" + MAX_SIMULTANEOUS_STREAMS);
+      if (cbuilders.size >= MAX_STREAMS) throw new RuntimeException("Too many streams");
       cbuilders.put(begin.id, new StreamBuilder(begin));
 
     } else if (packet instanceof StreamChunk chunk) {
@@ -74,10 +73,8 @@ public class StreamReceiver {
       if (begin.total >= StreamHead.MAX_STREAM_SIZE)
         throw new RuntimeException("Stream is too big for " + connection + "; " +
                                    begin.total + ">=" + StreamHead.MAX_STREAM_SIZE);
-      IntMap<StreamBuilder> builders = sbuilders.get(connection.getID(), () -> new IntMap<>(MAX_SIMULTANEOUS_STREAMS));
-      if (builders.size >= MAX_SIMULTANEOUS_STREAMS)
-        throw new RuntimeException("Too many simultaneous streams for " + connection + "; " +
-                                   builders.size + ">=" + MAX_SIMULTANEOUS_STREAMS);
+      IntMap<StreamBuilder> builders = sbuilders.get(connection.getID(), () -> new IntMap<>(MAX_STREAMS));
+      if (builders.size >= MAX_STREAMS) throw new RuntimeException("Too many streams for " + connection);
       builders.put(begin.id, new StreamBuilder(begin));
 
     } else if (packet instanceof StreamChunk chunk) {

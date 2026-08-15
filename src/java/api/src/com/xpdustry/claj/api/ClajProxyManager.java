@@ -169,7 +169,7 @@ public class ClajProxyManager {
       proxy.closeRoom();
       proxy.stop();
       try { proxy.dispose(); }
-      catch (Exception e) {}
+      catch (Exception _) {}
     }
   }
 

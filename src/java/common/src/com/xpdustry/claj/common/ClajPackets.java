@@ -19,15 +19,18 @@
 
 package com.xpdustry.claj.common;
 
+import arc.net.DcReason;
+
 import com.xpdustry.claj.common.net.stream.*;
 import com.xpdustry.claj.common.packets.*;
+import com.xpdustry.claj.common.util.Structs;
 
 
 public class ClajPackets {
   public static void init() {
     ClajNet.register(ConnectionJoinPacket::new);
     ClajNet.register(ConnectionClosedPacket::new);
-    ClajNet.register(ConnectionPacketWrapPacket::new);
+    ClajNet.register(ConnectionPayloadPacket::new);
     ClajNet.register(ConnectionIdlingPacket::new);
     ClajNet.register(RoomCreationRequestPacket::new); // <-- should be the 5th
     ClajNet.register(RoomClosureRequestPacket::new);  // These two MUST not be moved.
@@ -36,7 +39,7 @@ public class ClajPackets {
     ClajNet.register(RoomJoinRequestPacket::new);
     ClajNet.register(RoomJoinAcceptedPacket::new);
     ClajNet.register(RoomJoinDeniedPacket::new);
-    ClajNet.register(RoomLinkPacket::new);
+    ClajNet.register(RoomLinkPacket::new); //TODO: rename to RoomCreatedPacket and move it to RoomClosureRequestPacket
     ClajNet.register(RoomConfigPacket::new);
     ClajNet.register(RoomStateRequestPacket::new);
     ClajNet.register(RoomStatePacket::new);
@@ -45,7 +48,7 @@ public class ClajPackets {
     ClajNet.register(RoomInfoPacket::new);
     ClajNet.register(RoomListRequestPacket::new);
     ClajNet.register(RoomListPacket::new);
-    ClajNet.register(ServerInfoPacket::new);
+    ClajNet.register(ServerInfoPacket::new); //TODO: remove this packet from list as it's special?
     ClajNet.register(ClajTextMessagePacket::new);
     ClajNet.register(ClajMessagePacket::new);
     ClajNet.register(ClajPopupPacket::new);
@@ -56,12 +59,16 @@ public class ClajPackets {
 
   /** Generic client connection event. */
   public static class Connect implements Packet {
-    public String address;
+    public static final Connect instance = new Connect();
   }
 
   /** Generic client disconnection event. */
   public static class Disconnect implements Packet {
-    public arc.net.DcReason reason;
+    static final Disconnect[] all = Structs.map(DcReason.values(), Disconnect.class, Disconnect::new);
+    public final DcReason reason;
+    Disconnect(DcReason reason) { this.reason = reason; }
+    public static Disconnect get(int i) { return all[i]; }
+    public static Disconnect get(DcReason reason) { return get(reason.ordinal()); }
   }
 
   /** Generic client idle event. */

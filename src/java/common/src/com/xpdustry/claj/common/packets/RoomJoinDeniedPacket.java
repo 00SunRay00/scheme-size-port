@@ -29,8 +29,8 @@ public class RoomJoinDeniedPacket extends RoomLinkPacket {
   public RejectReason reason;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
-    super.readImpl(read);
+  public void read(ByteBufferInput read) {
+    super.read(read);
     reason = RejectReason.all[read.readByte()];
   }
 

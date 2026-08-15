@@ -35,7 +35,6 @@ import arc.struct.ObjectMap;
 import arc.struct.ObjectSet;
 import arc.struct.Seq;
 import arc.util.Align;
-import arc.util.Log;
 import arc.util.Reflect;
 import arc.util.Strings;
 import arc.util.Time;
@@ -53,6 +52,7 @@ import mindustry.ui.Styles;
 import mindustry.ui.dialogs.BaseDialog;
 import mindustry.ui.dialogs.PaletteDialog;
 //import mindustry.ui.fragments.MenuFragment.MenuButton;
+import mindustry.ui.fragments.MenuFragment.MenuButton;
 
 import com.xpdustry.claj.api.Claj;
 import com.xpdustry.claj.api.ClajRoom;
@@ -93,56 +93,33 @@ public class BrowserDialog extends BaseDialog {
 
     // Add the CLaJ browser button bellow Play > Load Save on PC, and after Quit button on mobile
     addButton();
-    Events.run(EventType.ResizeEvent.class, this::addButton);
   }
 
   void addButton() {
-    // Cannot easily get the container
-    Table menu = locateMenu("buttons");
-    if (menu == null) return;
-
+    // Add the CLaJ browser button bellow Play > Load Save, or after the Quit button if mobile
     if (Vars.mobile) {
-      if (Core.graphics.isPortrait()) menu.row();
-      menu.add(new MobileButton(Icon.host, "@claj.browser.name", () -> checkPlay(this::show)));
-
+      if (Vars.ui.menuGroup.find("buttons") != null) {
+        Events.on(EventType.ResizeEvent.class, _ -> {
+          Table menu = Vars.ui.menuGroup.find("buttons");
+          if (menu == null) return; // Should not happen
+          if (Core.graphics.isPortrait() && menu.getCells().size % menu.getColumns() == 0) menu.row();
+          menu.add(new MobileButton(Icon.host, "@claj.browser.name", () -> checkPlay(this::show)));
+          //TODO: place button on first row if landscape
+        });
+        return;
+      }
     } else {
-      Table submenu = locateMenu("submenu");
-      if (submenu == null) return;
-
-      // Dynamically adds the claj browser button, since this is the only way in v7
-      menu.getCells().first().get().clicked(() -> {
-        if (submenu.find("claj-browser") != null) return; // avoids button duplication
-        submenu.button("@claj.browser.name", Icon.host, Styles.flatToggleMenut, () -> {
-          checkPlay(this::show);
-          Reflect.set(Vars.ui.menufrag, "currentMenu", null);
-          Reflect.invoke(Vars.ui.menufrag, "fadeOutMenu");
-        }).marginLeft(11f).with(b -> b.name = "claj-browser").row();
-      });
+      if (Vars.ui.menufrag.desktopButtons != null) {
+        MenuButton button = Vars.ui.menufrag.desktopButtons.find(m -> m.text.equals("@play"));
+        if (button != null && button.submenu != null) {
+          button.submenu.add(new MenuButton("@claj.browser.name", Icon.host, () -> checkPlay(this::show)));
+          return;
+        }
+      }
     }
 
-    // Replace by this when v7 support is dropped
-    /*
-    // Add the CLaJ browser button bellow Play > Load Save
-    if (Vars.mobile) {
-      Events.on(EventType.ResizeEvent.class, e -> {
-        Table menu = Vars.ui.menuGroup.find("buttons");
-        if (menu == null) return;
-        if (Core.graphics.isPortrait()) menu.row();
-        menu.add(new MobileButton(Icon.host, "@claj.browser.name", () -> checkPlay(this::show)));
-      });
-    } else {
-      Seq<MenuButton> buttons = Vars.ui.menufrag.desktopButtons;
-      MenuButton button = buttons.find(m -> m.text.equals("@play"));
-      if (button != null && button.submenu != null) buttons = button.submenu;
-      buttons.add(new MenuButton("@claj.browser.name", Icon.host, () -> checkPlay(this::show)));
-    }
-    */
-  }
-
-  Table locateMenu(String name) {
-    Table menu = Vars.ui.menuGroup.find(name);
-    if (menu == null) Log.err("Unable to place claj buttons, main container not found!");
-    return menu;
+    // In case of
+    Vars.ui.menufrag.addButton("@claj.browser.name", Icon.host, () -> checkPlay(this::show));
   }
 
   public void rebuild() {
@@ -241,7 +218,7 @@ public class BrowserDialog extends BaseDialog {
           label.add("@claj.browser.incompatible");
 
         }
-        if (Vars.mobile) ping.row();
+        if (Vars.mobile && Core.graphics.isPortrait()) ping.row();
         ping.add(s.ping + "ms", Color.lightGray, 0.91f).left();
         if (server.compatible) listRooms(server, dest, done, error);
         else done.run();

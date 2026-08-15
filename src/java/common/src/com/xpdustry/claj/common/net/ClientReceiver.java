@@ -28,28 +28,29 @@ import com.xpdustry.claj.common.ClajPackets.*;
 import com.xpdustry.claj.common.net.stream.StreamPacket;
 import com.xpdustry.claj.common.net.stream.StreamReceiver;
 import com.xpdustry.claj.common.packets.Packet;
-import com.xpdustry.claj.common.util.AddressUtil;
 
 
 /** A client listener that can delegate packet decoding and reception to the main app. */
 public class ClientReceiver implements NetListener {
   protected final ObjectMap<Class<?>, Cons<?>> listeners = new ObjectMap<>(32);
-  protected Cons<Runnable> delegator;
   protected Cons<Throwable> errorHandler;
   protected NetListenerFilter filter;
 
-  /** Receive will not be delegated. */
-  public ClientReceiver(EndPoint server) { this(server, null); }
-  public ClientReceiver(EndPoint server, Cons<Runnable> delegator) {
-    this.delegator = delegator;
-    this.filter = NetListenerFilter.defaultFilter;
-    this.errorHandler = Log::err;
-    server.addListener(this);
+  public ClientReceiver(EndPoint client) { this(client, NetListenerFilter.defaultFilter); }
+  public ClientReceiver(EndPoint client, NetListenerFilter filter) { this(client, filter, Log::err); }
+  public ClientReceiver(EndPoint client, NetListenerFilter filter, Cons<Throwable> errorHandler) {
+    setFilter(filter);
+    setErrorHandler(errorHandler);
+    client.addListener(this);
   }
 
   public void setFilter(NetListenerFilter filter) {
     if (filter == null) throw new NullPointerException("filter");
     this.filter = filter;
+  }
+
+  public NetListenerFilter getFilter() {
+    return filter;
   }
 
   public void setErrorHandler(Cons<Throwable> errorHandler) {
@@ -59,36 +60,27 @@ public class ClientReceiver implements NetListener {
 
   @Override
   public void connected(Connection connection) {
-    if (!filter.connected(connection)) return;
-    Connect packet = new Connect();
-    packet.address = AddressUtil.getString(connection);
-    delegateReceive(packet);
+    if (!filter.allowConnected(connection)) return;
+    receive(Connect.instance);
   }
 
   @Override
   public void disconnected(Connection connection, DcReason reason) {
-    if (!filter.disconnected(connection, reason)) return;
-    Disconnect packet = new Disconnect();
-    packet.reason = reason;
-    delegateReceive(packet);
+    if (!filter.allowDisconnected(connection, reason)) return;
+    receive(Disconnect.get(reason));
   }
 
   @Override
   public void received(Connection connection, Object object) {
-    if (!filter.received(connection, object)) return;
+    if (!filter.allowReceived(connection, object)) return;
     if (!(object instanceof Packet packet)) return;
-    delegateReceive(packet);
+    receive(packet);
   }
 
   @Override
   public void idle(Connection connection) {
-    if (!filter.idle(connection)) return;
-    delegateReceive(Idle.instance);
-  }
-
-  /** Whether packet reception is delegated to the main thread or not. */
-  public boolean delegated() {
-    return delegator != null;
+    if (!filter.allowIdle(connection)) return;
+    receive(Idle.instance);
   }
 
   public <T extends Packet> void handle(Class<T> type, Runnable listener) {
@@ -107,27 +99,23 @@ public class ClientReceiver implements NetListener {
     listeners.put(type, listener);
   }
 
+  public <T extends Packet> void handleReplace(Class<T> type, Cons<T> listener) {
+    listeners.put(type, listener);
+  }
+
   @SuppressWarnings("unchecked")
   public <T extends Packet> Cons<T> getListener(Class<T> type) {
     return (Cons<T>)listeners.get(type);
   }
 
-  /** Send packet reception to the main thread or not according to {@link #delegated}. */
-  public void delegateReceive(Packet packet) {
-    if (delegated()) delegator.get(() -> received(packet));
-    else received(packet);
-  }
-
   @SuppressWarnings("unchecked")
-  public void received(Packet packet) {
+  public void receive(Packet packet) {
     if (!packet.allow(false)) return; // Throw away unwanted packets
 
     try {
-      packet.handled();
-
       if (packet instanceof StreamPacket stream) {
         packet = StreamReceiver.received(stream);
-        if (packet != null) received(packet);
+        if (packet != null) receive(packet);
         return;
       }
 

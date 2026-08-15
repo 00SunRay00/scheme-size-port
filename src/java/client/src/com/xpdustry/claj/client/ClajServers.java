@@ -30,20 +30,30 @@ import arc.util.serialization.Jval;
 public class ClajServers {
   public static final String publicServersLink =
       "https://github.com/xpdustry/claj/blob/main/public-servers.hjson?raw=true";
-  public static final ArrayMap<String, String> online = new ArrayMap<>(),
-                                               custom = new ArrayMap<>();
+  public static final String mirrorPublicServersLink = "https://claj.xpdustry.com/nodes";
+  public static final ArrayMap<String, String> online = new ArrayMap<>(), custom = new ArrayMap<>();
 
   public static void refreshOnline(Runnable done, Cons<Throwable> failed) {
-    // Public list
-    Http.get(publicServersLink, result -> {
-      Jval.JsonMap list = Jval.read(result.getResultAsString()).asObject();
-      synchronized (online) {
-        online.clear();
-        for (ObjectMap.Entry<String, Jval> e : list)
-          online.put(e.key, e.value.asString());
-      }
-      Core.app.post(done);
-    }, t -> Core.app.post(() -> failed.get(t)));
+    Http.get(
+      publicServersLink,
+      r -> setServers(r.getResultAsString(), done),
+      // Fallback to official mirror. French servers are always accessible around the world. ...no?
+      t -> Http.get(
+        mirrorPublicServersLink,
+        r -> setServers(r.getResultAsString(), done),
+        _ -> Core.app.post(() -> failed.get(t))
+      )
+    );
+  }
+
+  private static void setServers(String json, Runnable done) {
+    Jval.JsonMap list = Jval.read(json).asObject();
+    synchronized (online) {
+      online.clear();
+      for (ObjectMap.Entry<String, Jval> e : list)
+        online.put(e.key, e.value.asString());
+    }
+    Core.app.post(done);
   }
 
   @SuppressWarnings("unchecked")

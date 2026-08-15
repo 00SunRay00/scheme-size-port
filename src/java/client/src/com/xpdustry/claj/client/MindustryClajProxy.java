@@ -19,71 +19,94 @@
 
 package com.xpdustry.claj.client;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+
 import arc.Core;
 import arc.net.Connection;
-import arc.util.Ratekeeper;
-
+import arc.net.DcReason;
 import mindustry.Vars;
 import mindustry.net.*;
 import mindustry.net.Packets.KickReason;
 
 import com.xpdustry.claj.api.ClajProvider;
 import com.xpdustry.claj.api.ClajProxy;
-import com.xpdustry.claj.common.packets.ConnectionJoinPacket;
-import com.xpdustry.claj.common.util.Structs;
+import com.xpdustry.claj.api.net.VirtualConnection;
 
 
 public class MindustryClajProxy extends ClajProxy {
-  //TODO: still useful?
-  /** No-op rate-keeper to prevent the local mindustry server from life blacklisting the claj server. */
-  private static final Ratekeeper noopRate = new Ratekeeper() {
-    @Override
-    public boolean allow(long spacing, int cap) {
-      return true;
-    }
-  };
-
   public MindustryClajProxy(ClajProvider provider) {
     super(provider);
+    // Try to fix some issues with entities not loading when receiving world
+    forceTcp = true;
+  }
 
-    // Modify listener to set the noop rate
-    receiver.handle(ConnectionJoinPacket.class, p -> {
-      NetConnection net = toMindustryConnection(getConnection(p.conID));
-      if (net == null) return;
-      // Change the packet rate and chat rate to a no-op version to avoid a potential life blacklisting
-      net.packetRate = noopRate;
-      net.chatRate = noopRate;
-    });
+  public static boolean isMindustryConnection(Connection con) {
+    return con.getArbitraryData() instanceof NetConnection;
+  }
+
+  public static NetConnection toMindustryConnection(Connection con) {
+    return con != null && con.getArbitraryData() instanceof NetConnection nc ? nc : null;
+  }
+
+  public static VirtualConnection toVirtualConnection(NetConnection con) {
+    return con instanceof ArcNetProvider.ArcConnection acon &&
+           acon.connection instanceof VirtualConnection vcon ? vcon : null;
   }
 
   public Iterable<NetConnection> getMindustryConnections() {
-    return Structs.generator(getConnections(),
-                             MindustryClajProxy::isMindustryConnection,
-                             MindustryClajProxy::toMindustryConnection);
+    return () -> new Iterator<>() {
+      final Iterator<VirtualConnection> it = getConnections().iterator();
+      NetConnection next;
+
+      @Override
+      public boolean hasNext() {
+        if (next != null) return true;
+        while (it.hasNext()) {
+          next = toMindustryConnection(it.next());
+          if (next != null) return true;
+        }
+        return false;
+      }
+
+      @Override
+      public NetConnection next() {
+        if (!hasNext()) throw new NoSuchElementException();
+        NetConnection value = next;
+        next = null;
+        return value;
+      }
+    };
   }
 
   public int getMindustryConnectionsSize() {
-    return Structs.count(getConnections(), MindustryClajProxy::isMindustryConnection);
+    int total = 0;
+    for (VirtualConnection t : getConnections()) {
+      if (isMindustryConnection(t)) total++;
+    }
+    return total;
   }
 
-  public static boolean isMindustryConnection(Connection connection) {
-    return connection.getArbitraryData() instanceof NetConnection;
+  /** @return the associated virtual connection from this proxy only. */
+  public VirtualConnection getConnection(NetConnection con) {
+    VirtualConnection vcon = toVirtualConnection(con);
+    return hasConnection(vcon) ? vcon : null;
   }
 
-  public static NetConnection toMindustryConnection(Connection connection) {
-    return connection != null && connection.getArbitraryData() instanceof NetConnection nc ? nc : null;
+  public boolean hasConnection(NetConnection con) {
+    return hasConnection(toVirtualConnection(con));
   }
 
   public void kickAllConnections(KickReason reason) {
-    for (NetConnection con : getMindustryConnections())
-      con.kick(reason);
+    // No way to broadcast kick here
+    for (NetConnection con : getMindustryConnections()) con.kick(reason);
   }
 
   @Override
-  public void closeRoom() {
-    // Kick players before
-    kickAllConnections(KickReason.serverClose);
-    super.closeRoom();
+  public void closeAllConnections(DcReason reason) {
+    // Kick players before, if we can
+    if (isConnected()) kickAllConnections(KickReason.serverClose);
+    super.closeAllConnections(reason);
   }
 
   public Host getState() {

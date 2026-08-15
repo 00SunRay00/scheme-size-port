@@ -25,7 +25,7 @@ import arc.util.io.ByteBufferOutput;
 import com.xpdustry.claj.common.status.ClajType;
 
 
-public class RoomCreationRequestPacket extends DelayedPacket {
+public class RoomCreationRequestPacket implements Packet {
   /** Must be the same as the server's major version to be able to connect. */
   public int version = -1;
   /** Implementation type. */
@@ -33,7 +33,7 @@ public class RoomCreationRequestPacket extends DelayedPacket {
 
   //TODO: test this
   @Override
-  protected void readImpl(ByteBufferInput read) {
+  public void read(ByteBufferInput read) {
     // Make it compatible with older version were no CLaJ version check was done,
     // or were a string was used to do the check.
     // This works due to the way strings are encoded. 2 bytes (length) + 3 or 5 bytes (claj version)
@@ -55,9 +55,9 @@ public class RoomCreationRequestPacket extends DelayedPacket {
     write.writeInt(version);
     type.write(write.buffer);
   }
-    
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return isServer; 
+  public boolean allow(boolean isServer) {
+    return isServer;
   }
 }

@@ -22,7 +22,8 @@ package com.xpdustry.claj.common.util;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import arc.func.*;
+import arc.func.Func;
+import arc.func.Intf;
 import arc.util.Reflect;
 
 
@@ -36,132 +37,69 @@ public class Structs extends arc.util.Structs {
     return next;
   }
 
+  public static <T, R> R[] map(T[] array, Class<R> type, Func<T, R> mapper) {
+    R[] next = Reflect.newArray(type, array.length);
+    for (int i=0; i<array.length; i++) next[i] = mapper.get(array[i]);
+    return next;
+  }
+
   @SafeVarargs
-  public static <T> Iterable<T> generator(T... list) {
+  public static <T> Iterable<T> iterable(T... array) {
     return () -> new Iterator<>() {
       int index = 0;
-      public boolean hasNext() { return index < list.length; }
-      public T next() { return list[index++]; }
-    };
-  }
-
-  public static <T, R> Iterable<R> generator(T[] list, Func<T, R> extractor) {
-    return () -> new Iterator<>() {
-      int index = 0;
-      public boolean hasNext() { return index < list.length; }
-      public R next() { return extractor.get(list[index++]); }
-    };
-  }
-
-  public static <T> Iterable<T> generator(T[] list, Boolf<T> predicate) {
-    return () -> new Iterator<>() {
-      int index = 0;
-      boolean hasNext = true;
-      T next;
-
-      { advance(); }
-
-      private T advance() {
-        if (!hasNext) throw new NoSuchElementException();
-        T old = next;
-        hasNext = false;
-        while (index < list.length) {
-          T candidate = list[index++];
-          if(predicate.get(candidate)) {
-            next = candidate;
-            hasNext = true;
-            break;
-          }
-        }
-        return old;
+      public boolean hasNext() { return index < array.length; }
+      public T next() {
+        if (index >= array.length) throw new NoSuchElementException();
+        return array[index++];
       }
-
-      public boolean hasNext() { return hasNext; }
-      public T next() { return advance(); }
     };
   }
 
-  public static <T, R> Iterable<R> generator(T[] list, Boolf<T> predicate, Func<T, R> extractor) {
-    return () -> new Iterator<>() {
-      int index = 0;
-      boolean hasNext = true;
-      T next;
-
-      { advance(); }
-
-      private T advance() {
-        if (!hasNext) throw new NoSuchElementException();
-        T old = next;
-        hasNext = false;
-        while (index < list.length) {
-          T candidate = list[index++];
-          if(predicate.get(candidate)) {
-            next = candidate;
-            hasNext = true;
-            break;
-          }
-        }
-        return old;
-      }
-
-      public boolean hasNext() { return hasNext; }
-      public R next() { return extractor.get(advance()); }
-    };
-  }
-
-  public static <T> int max(Iterable<T> list, Intf<T> intifier) {
+  public static <T> int max(Iterable<T> array, Intf<T> intifier) {
     boolean first = true;
     int index = 0;
-
-    for (T i : list) {
+    for (T i : array) {
       int s = intifier.get(i);
       if (first) index = s;
       else if (s > index) index = s;
       first = false;
     }
-
     return index;
   }
 
-  public static <T> int max(T[] list, Intf<T> intifier) {
+  public static <T> int max(T[] array, Intf<T> intifier) {
     boolean first = true;
     int index = 0;
-
-    for (T i : list) {
+    for (T i : array) {
       int s = intifier.get(i);
       if (first) index = s;
       else if (s > index) index = s;
       first = false;
     }
-
     return index;
   }
 
-  public static <T> int min(Iterable<T> list, Intf<T> intifier) {
+  public static <T> int min(Iterable<T> array, Intf<T> intifier) {
     boolean first = true;
     int index = 0;
-
-    for (T i : list) {
+    for (T i : array) {
       int s = intifier.get(i);
       if (first) index = s;
       else if (s < index) index = s;
       first = false;
     }
-
     return index;
   }
 
-  public static <T> int min(T[] list, Intf<T> intifier) {
+  public static <T> int min(T[] array, Intf<T> intifier) {
     boolean first = true;
     int index = 0;
-
-    for (T i : list) {
+    for (T i : array) {
       int s = intifier.get(i);
       if (first) index = s;
       else if (s < index) index = s;
       first = false;
     }
-
     return index;
   }
 }

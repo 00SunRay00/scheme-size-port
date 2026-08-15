@@ -25,11 +25,11 @@ import arc.util.io.ByteBufferOutput;
 import com.xpdustry.claj.common.status.MessageType;
 
 
-public class ClajMessagePacket extends DelayedPacket {
+public class ClajMessagePacket implements Packet {
   public MessageType message;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
+  public void read(ByteBufferInput read) {
     message = MessageType.all[read.readByte()];
   }
 
@@ -37,9 +37,9 @@ public class ClajMessagePacket extends DelayedPacket {
   public void write(ByteBufferOutput write) {
     write.writeByte(message.ordinal());
   }
-  
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return !isServer; 
+  public boolean allow(boolean isServer) {
+    return !isServer;
   }
 }

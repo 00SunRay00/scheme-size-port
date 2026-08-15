@@ -39,8 +39,8 @@ public class RoomJoinPacket extends RoomLinkPacket {
   public ClajType type;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
-    super.readImpl(read);
+  public void read(ByteBufferInput read) {
+    super.read(read);
     // Make it compatible with older versions where room password wasn't here
     // This will only work if the room doesn't have a password set
     if (read.buffer.hasRemaining()) {
@@ -61,9 +61,9 @@ public class RoomJoinPacket extends RoomLinkPacket {
     write.writeShort(password);
     type.write(write.buffer);
   }
-    
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return isServer; 
+  public boolean allow(boolean isServer) {
+    return isServer;
   }
 }

@@ -600,19 +600,19 @@ public class Strings extends arc.util.Strings {
   }
 
   public static String formatBytes(long v) {
-    return formatSize(v, "B");
+    return formatSize(v, 1000, "B");
   }
 
-  public static String formatSize(long value, String unit) {
-    boolean negated = false;
+  public static String formatSize(long value, int base, String unit) {
+    String negated = "";
     if (value < 0) {
-      negated = true;
+      negated = "-";
       value = -value;
     }
-    if (value < 1024) return (negated ? "-" + value : value) + " " + unit;
-    int z = (63 - Long.numberOfLeadingZeros(value)) / 10;
-    return String.format((negated ? "-%.1f %s" : "%.1f %s") + unit,
-                         Math.scalb((double)value, z * -10), " KMGTPE".charAt(z));
+    if (value < base) return negated + value + ' ' + unit;
+    int z = (int)(Math.log(value) / Math.log(base));
+    double v = value / Math.pow(base, z);
+    return negated + (int)v + '.' + (int)((v * 10) % 10) + ' ' + "KMGTPE".charAt(z-1) + unit;
   }
 
   private static final Object[][] TIME_PERIODS = {

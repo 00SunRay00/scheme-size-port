@@ -25,11 +25,11 @@ import arc.util.io.ByteBufferOutput;
 import com.xpdustry.claj.common.status.CloseReason;
 
 
-public class RoomClosedPacket extends DelayedPacket {
+public class RoomClosedPacket implements Packet {
   public CloseReason reason;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
+  public void read(ByteBufferInput read) {
     reason = CloseReason.all[read.readByte()];
   }
 
@@ -37,9 +37,9 @@ public class RoomClosedPacket extends DelayedPacket {
   public void write(ByteBufferOutput write) {
     write.writeByte(reason.ordinal());
   }
-    
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return !isServer; 
+  public boolean allow(boolean isServer) {
+    return !isServer;
   }
 }

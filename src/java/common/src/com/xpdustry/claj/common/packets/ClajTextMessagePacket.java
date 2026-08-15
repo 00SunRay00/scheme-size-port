@@ -26,21 +26,21 @@ import com.xpdustry.claj.common.util.Strings;
 
 
 /** Note that the text will be truncated to {@code 1024} characters. */
-public class ClajTextMessagePacket extends DelayedPacket {
+public class ClajTextMessagePacket implements Packet {
   public String message;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
+  public void read(ByteBufferInput read) {
     message = Strings.truncate(Strings.readUTF(read), 1024);
   }
 
   @Override
   public void write(ByteBufferOutput write) {
     Strings.writeUTF(write, Strings.truncate(message, 1024));
-  }  
-  
+  }
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return !isServer; 
+  public boolean allow(boolean isServer) {
+    return !isServer;
   }
 }

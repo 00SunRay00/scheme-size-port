@@ -77,8 +77,6 @@ public class JoinDialog extends BaseDialog {
     addButton();
   }
 
-  /** @deprecated i keep that until the next release. */
-  @Deprecated
   void addButton() {
     if (Vars.mobile) {
       // adds in a new line for mobile players

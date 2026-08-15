@@ -22,6 +22,7 @@ package com.xpdustry.claj.client;
 import arc.ApplicationListener;
 import arc.Core;
 import arc.Events;
+import arc.util.Reflect;
 import arc.util.Time;
 
 import mindustry.Vars;
@@ -35,14 +36,33 @@ import com.xpdustry.claj.api.Claj;
 
 
 public class Main extends Mod {
-  public static MindustryClajProvider provider;
+  private static Mods.ModMeta meta;
+  private static MindustryClajProvider provider;
+  private static ClajNetProvider netProvider;
+
+  /** @return the mod meta, using this class. */
+  public static Mods.ModMeta getMeta() {
+    if (meta != null) return meta;
+    Mods.LoadedMod load = Vars.mods.getMod(Main.class);
+    if(load == null) throw new IllegalArgumentException("Mod is not loaded yet (or missing)!");
+    return meta = load.meta;
+  }
+
+  public static MindustryClajProvider getProvider() {
+    return provider;
+  }
+
+  public static ClajNetProvider getNetProvider() {
+    return netProvider;
+  }
 
   @Override
   public void init() {
+    if (provider != null) return;
     provider = new MindustryClajProvider();
     Claj.init(provider);
-    ClajUpdater.schedule();
     initEvents();
+    initBroadcastHook();
     ClajUi.init();
   }
 
@@ -50,16 +70,13 @@ public class Main extends Mod {
   public void initEvents() {
     // Pretty difficult to know when the player quits the game,
     // there is no event and StateChangeEvent is not reliable for that...
-    Vars.ui.paused.hidden(() -> {
+    Runnable closeRooms = () -> {
       if (Vars.net.active() && !Vars.state.isMenu()) return;
-      Claj.get().closeRooms();
-    });
+      stopClaj();
+    };
+    Vars.ui.paused.hidden(closeRooms);
     Vars.ui.restart.hidden(() -> {
-      if (Vars.state.isCampaign()) return;
-      Time.run(7f, () -> {
-        if (Vars.net.active() && !Vars.state.isMenu()) return;
-        Claj.get().closeRooms();
-      });
+      if (!Vars.state.isCampaign()) Time.run(7f, closeRooms);
     });
 
     Events.run(EventType.HostEvent.class, this::stopClaj);
@@ -85,10 +102,13 @@ public class Main extends Mod {
     ClajUi.join.resetLastLink(); // Avoid reconnect to a room after connecting to a normal server
   }
 
-  /** @return the mod meta, using the host mod class (scheme.Main). */
-  public static Mods.ModMeta getMeta() {
-    Mods.LoadedMod load = Vars.mods.getMod(scheme.Main.class);
-    if(load == null) throw new IllegalArgumentException("Mod is not loaded yet (or missing)!");
-    return load.meta;
+  public void initBroadcastHook() {
+    if (netProvider != null) return;
+    netProvider = new ClajNetProvider(
+      Reflect.get(Vars.net, "provider"),
+      MindustryClajProvider.mindustryClient,
+      MindustryClajProvider.mindustryServer
+    );
+    Reflect.set(Vars.net, "provider", netProvider);
   }
 }

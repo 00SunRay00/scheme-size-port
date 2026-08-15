@@ -20,12 +20,9 @@
 package com.xpdustry.claj.api.net;
 
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 
-import arc.net.ArcNetException;
-import arc.net.Connection;
-import arc.net.DcReason;
-import arc.net.EndPoint;
-import arc.net.NetListener;
+import arc.net.*;
 
 import com.xpdustry.claj.common.net.DispatchListener;
 import com.xpdustry.claj.common.util.AddressUtil;
@@ -42,6 +39,8 @@ import com.xpdustry.claj.common.util.AddressUtil;
 public class VirtualConnection extends Connection {
   /** The real client, aka the proxy. */
   public final ProxyClient proxy;
+  /** The original serializer. Currently used in {@link #sendTCPBuffer()} to skip prefix. */
+  public final NetSerializer serialization;
 
   protected final int id;
   protected final DispatchListener dispatcher = new DispatchListener(true);
@@ -61,41 +60,37 @@ public class VirtualConnection extends Connection {
   /** Not thread-safe for a little bit of random. */
   private boolean isIdling = true, sentThisCycle = false;
 
-  public VirtualConnection(ProxyClient proxy, int id, long addressHash) {
+  public VirtualConnection(ProxyClient proxy, NetSerializer serialization, int id, long addressHash) {
     this.proxy = proxy;
+    this.serialization = serialization;
     this.id = id;
     this.remoteAddress = new InetSocketAddress(AddressUtil.generate(addressHash), proxy.connectTcpPort);
   }
 
   @Override
-  public int sendTCP(Object object) {
-    resetIdle();
-    return proxy.send(this, object, true);
+  public int sendTCP(Object object) { return proxy.send(this, object, true); }
+  @Override
+  public int sendTCPBuffer(ByteBuffer buffer) {
+    int pos = buffer.position();
+    buffer.position(pos + serialization.getLengthLength()); // Skip length prefix to avoid a duplicate
+    try { return proxy.send(this, buffer, true); }
+    finally { buffer.position(pos); }
   }
   @Override
-  public int sendUDP(Object object) {
-    resetIdle();
-    return proxy.send(this, object, false);
-  }
+  public int sendUDP(Object object) { return proxy.send(this, object, false); }
   @Override
-  public void close(DcReason reason) {
-    resetIdle();
-    proxy.close(this, reason);
-  }
+  public int sendUDPBuffer(ByteBuffer buffer) { return proxy.send(this, buffer, false); }
+  @Override
+  public void close(DcReason reason) { proxy.close(this, reason); }
   /**
    * Close the connection without notify the server about that. <br>
    * Common use is when the server itself is saying to close the connection.
    */
-  public void closeQuietly(DcReason reason) {
-    resetIdle();
-    proxy.closeQuietly(this, reason);
-  }
+  public void closeQuietly(DcReason reason) { proxy.closeQuietly(this, reason); }
 
   public NetListener[] getListeners() { return dispatcher.getListeners(); }
-  /** Only used when sending world data */
   @Override
   public void addListener(NetListener listener) { dispatcher.addListener(listener); }
-  /** Only used when sending world data */
   @Override
   public void removeListener(NetListener listener) { dispatcher.removeListener(listener); }
 

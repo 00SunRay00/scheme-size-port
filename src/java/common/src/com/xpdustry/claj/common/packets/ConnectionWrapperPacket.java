@@ -23,11 +23,12 @@ import arc.util.io.ByteBufferInput;
 import arc.util.io.ByteBufferOutput;
 
 
-public abstract class ConnectionWrapperPacket extends DelayedPacket {
+public abstract class ConnectionWrapperPacket implements Packet {
+  /** {@code 0} can be used to broadcast message. */
   public int conID;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
+  public void read(ByteBufferInput read) {
     conID = read.readInt();
   }
 
