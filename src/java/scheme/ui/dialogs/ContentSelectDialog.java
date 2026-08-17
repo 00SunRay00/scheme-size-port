@@ -3,6 +3,7 @@ package scheme.ui.dialogs;
 import arc.func.Cons3;
 import arc.func.Cons4;
 import arc.func.Func;
+import arc.scene.event.Touchable;
 import arc.scene.style.TextureRegionDrawable;
 import arc.scene.ui.Label;
 import arc.scene.ui.Slider;
@@ -30,16 +31,21 @@ public class ContentSelectDialog<T extends UnlockableContent> extends ListDialog
     public boolean showSlider;
     public int items;
 
+    public Label label;
+    public Slider slider;
 
     public ContentSelectDialog(String title, Seq<T> content, int min, int max, int step, Func<Float, String> format) {
         super(title);
         this.format = format;
 
-        Label label = new Label("", Styles.outlineLabel);
-        Slider slider = new Slider(min, max, step, false);
+        label = new Label("", Styles.outlineLabel);
+        label.touchable = Touchable.enabled;
+        slider = new Slider(min, max, step, false);
 
         slider.moved(value -> label.setText(format.get(value)));
         slider.change(); // update label
+
+        label.clicked(() -> showAmountInput(slider, format));
 
         Table table = new Table();
         table.pane(pane -> {
@@ -59,7 +65,12 @@ public class ContentSelectDialog<T extends UnlockableContent> extends ListDialog
 
         cont.table(cont -> {
             cont.add(table).row();
-            cont.add(label).center().padTop(16f).visible(() -> showSlider).row();
+            cont.table(lblTable -> {
+                lblTable.add(label);
+                lblTable.button(Icon.pencil, Styles.clearNonei, () -> showAmountInput(slider, format))
+                        .size(28f).padLeft(6f).tooltip("@edit");
+            }).center().padTop(16f).visible(() -> showSlider).row();
+
             cont.table(slide -> {
                 slide.button(Icon.add, () -> {
                     content.each(this::visible, item -> callback.get(players.get(), teams.get(), item, slider.getValue()));
@@ -89,6 +100,27 @@ public class ContentSelectDialog<T extends UnlockableContent> extends ListDialog
             });
         });
         addPlayer();
+    }
+
+    private void showAmountInput(Slider slider, Func<Float, String> format) {
+        ui.showTextInput(
+            bundle.get("amount", "Количество"),
+            bundle.get("enter.amount", "Введите количество:"),
+            String.valueOf((int) slider.getValue()),
+            text -> {
+                try {
+                    float val = Float.parseFloat(text);
+                    if (val > slider.getMaxValue()) {
+                        slider.setRange(slider.getMinValue(), val);
+                    } else if (val < slider.getMinValue()) {
+                        slider.setRange(val, slider.getMaxValue());
+                    }
+                    slider.setValue(val);
+                    label.setText(format.get(val));
+                    slider.change();
+                } catch (Exception ignored) {}
+            }
+        );
     }
 
     public void select(boolean showSlider, boolean showPlayers, boolean showTeams, Cons4<Player, Team, T, Float> callback) {

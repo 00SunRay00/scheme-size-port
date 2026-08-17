@@ -263,6 +263,7 @@ public class HudFragment {
 
         Table info = getInfoTable();
         if (info != null) info.update(() -> {
+            TileInfo.apply(info);
             if (!settings.getBool("mobilebuttons") && !mobile) {
                 info.setTranslation(0f, 0f);
                 return;
@@ -320,6 +321,7 @@ public class HudFragment {
 
             Table info = getInfoTable();
             if (info != null) info.update(() -> {
+                TileInfo.apply(info);
                 if (!settings.getBool("mobilebuttons") && !mobile) {
                     info.setTranslation(0f, 0f);
                     return;

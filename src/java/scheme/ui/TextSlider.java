@@ -12,20 +12,46 @@ import arc.scene.utils.Disableable;
 import mindustry.ui.Styles;
 import mindustry.ui.dialogs.SettingsMenuDialog.StringProcessor;
 
+import static arc.Core.*;
+import static mindustry.Vars.*;
+
 public class TextSlider extends Table implements Disableable{
 
     public Label label;
     public Slider slider;
 
     public TextSlider(int min, int max, int step, int def, StringProcessor processor) {
-        touchable = Touchable.disabled;
+        touchable = Touchable.childrenOnly;
 
         label = labelWrap("").style(Styles.outlineLabel).padLeft(12f).growX().left().get();
+        label.touchable = Touchable.enabled;
         slider = new Slider(min, max, step, false);
 
         slider.moved(value -> label.setText(processor.get((int) value)));
         slider.setValue(def);
         slider.change();
+
+        label.clicked(() -> {
+            if (isDisabled()) return;
+            ui.showTextInput(
+                bundle.get("amount", "Значение"),
+                bundle.get("enter.amount", "Введите значение:"),
+                String.valueOf((int) slider.getValue()),
+                text -> {
+                    try {
+                        float val = Float.parseFloat(text);
+                        if (val > slider.getMaxValue()) {
+                            slider.setRange(slider.getMinValue(), val);
+                        } else if (val < slider.getMinValue()) {
+                            slider.setRange(val, slider.getMaxValue());
+                        }
+                        slider.setValue(val);
+                        label.setText(processor.get((int) val));
+                        slider.change();
+                    } catch (Exception ignored) {}
+                }
+            );
+        });
     }
 
     public Cell<Stack> build(Table table) {
