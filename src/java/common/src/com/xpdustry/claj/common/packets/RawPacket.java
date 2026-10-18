@@ -47,6 +47,14 @@ public class RawPacket implements Packet {
     read(read.buffer);
   }
 
+  public RawPacket write(ByteBuffer buffer) {
+    ByteBuffer data = data();
+    int pos = data.position();
+    buffer.put(data);
+    data.position(pos);
+    return this;
+  }
+
   @Override
   public void write(ByteBufferOutput write) {
     write(data(), write);
@@ -87,7 +95,7 @@ public class RawPacket implements Packet {
     if (src.hasArray()) {
       write.write(src.array(), src.arrayOffset() + src.position(), src.remaining());
     } else {
-      // Not safe to write a direct buffer directly, as it can be a stream
+      // Not safe to write a direct buffer directly, as 'write' can be a stream
       for (int i=src.position(), n=src.limit(); i<n; i++) {
         write.write(src.get(i));
       }

@@ -52,7 +52,8 @@ public class ClajClientSerializer implements NetSerializer, FrameworkSerializer 
 
   public Packet readClaj(ByteBuffer buffer) {
     Packet packet = ClajNet.newLocalPacket(buffer.get());
-    if(!packet.allow(false)) throw new ArcNetException("Invalid packet type for endpoint: " + packet.getClass());
+    if (!packet.allow(false))
+      throw new ArcNetException("Invalid packet type for endpoint: " + packet.getClass().getName());
     ByteBufferInput in = read.get();
     in.buffer = buffer;
     packet.read(in);
@@ -64,9 +65,9 @@ public class ClajClientSerializer implements NetSerializer, FrameworkSerializer 
     switch (object) {
       case ByteBuffer buf -> buffer.put(buf);
       case FrameworkMessage framework -> writeFramework(buffer.put(ClajNet.frameworkId), framework);
-      case RawPacket raw -> buffer.put(raw.data());
+      case RawPacket raw -> raw.write(buffer);
       case Packet packet -> writeClaj(buffer.put(ClajNet.id), packet);
-      default -> throw new ArcNetException("Unknown packet type: " + object.getClass());
+      default -> throw new ArcNetException("Unknown packet type: " + object.getClass().getName());
     }
   }
 

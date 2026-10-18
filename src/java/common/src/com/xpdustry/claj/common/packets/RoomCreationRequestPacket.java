@@ -31,7 +31,6 @@ public class RoomCreationRequestPacket implements Packet {
   /** Implementation type. */
   public ClajType type;
 
-  //TODO: test this
   @Override
   public void read(ByteBufferInput read) {
     // Make it compatible with older version were no CLaJ version check was done,

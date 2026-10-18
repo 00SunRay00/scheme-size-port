@@ -45,7 +45,7 @@ public class Main extends Mod {
         RainbowTeam.load();
         SBinding.load();
         ModedGlyphLayout.load();
-        if(mods.getMod("claj") == null || !mods.getMod("claj").enabled())new com.xpdustry.claj.client.Main().init();
+
 
         ui.schematics = schemas;
         ui.listfrag = listfrag;

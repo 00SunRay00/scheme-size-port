@@ -199,13 +199,13 @@ public abstract class ProxyClient extends Client {
   }
 
   public void closeAllConnections(DcReason reason) {
-    for (VirtualConnection c : getConnections()) {
+    eachConnections(c -> {
       boolean wasConnected = c.isConnected();
       c.setConnected0(false);
       if(wasConnected) c.notifyDisconnected0(reason);
       c.resetIdle();
       if (!broadcastSupported) close(c.getID(), reason);
-    }
+    });
     if (connections.any() && broadcastSupported) send(makeBroadcastClosePacket(reason));
     clearConnections();
     stales = null;

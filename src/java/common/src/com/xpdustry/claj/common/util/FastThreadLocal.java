@@ -37,16 +37,16 @@ public class FastThreadLocal<T> extends ThreadLocal<T> {
 
   private volatile long last = EMPTY;
   private volatile T data;
-  private final Prov<T> supplier;
+  protected final Prov<T> supplier;
 
-  public FastThreadLocal() { this(null); }
+  public FastThreadLocal() { this(() -> null); }
   public FastThreadLocal(Prov<T> supplier) {
     this.supplier = supplier;
   }
 
   @Override
   protected T initialValue() {
-    return supplier == null ? null : supplier.get();
+    return supplier.get();
   }
 
   @Override
@@ -76,19 +76,18 @@ public class FastThreadLocal<T> extends ThreadLocal<T> {
   }
 
   @SuppressWarnings("deprecation")
-  private long getCurrent() {
+  protected long getCurrent() {
     return Thread.currentThread().getId();
   }
 
-  private void tryUpdate(long current, T val) {
-    long currentOwner = last;
-    if (currentOwner == UPDATING) return;
-    if (!UPDATER.compareAndSet(this, currentOwner, UPDATING)) return;
+  protected void tryUpdate(long current, T val) {
+    long owner = last;
+    if (owner == UPDATING || !UPDATER.compareAndSet(this, owner, UPDATING)) return;
     data = val;
     last = current;
   }
 
-  private void tryRemove(long current) {
+  protected void tryRemove(long current) {
     if (!UPDATER.compareAndSet(this, current, UPDATING)) return;
     data = null;
     last = EMPTY;

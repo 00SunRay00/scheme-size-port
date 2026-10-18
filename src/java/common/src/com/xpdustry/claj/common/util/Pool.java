@@ -83,8 +83,8 @@ public class Pool<T> extends arc.util.pooling.Pool<T>{
     public boolean offer(T object){
         if(object == null) throw new IllegalArgumentException("object cannot be null.");
         for(;;){
-            int t = tail.get();
             int h = head.get();
+            int t = tail.get();
             int i = (t + 1) % capacity;
             if(i == h) return false; // Pool full
             if(tail.compareAndSet(t, i)){

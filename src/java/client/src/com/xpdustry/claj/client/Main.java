@@ -43,8 +43,9 @@ public class Main extends Mod {
   /** @return the mod meta, using this class. */
   public static Mods.ModMeta getMeta() {
     if (meta != null) return meta;
-    Mods.LoadedMod load = Vars.mods.getMod(scheme.Main.class);
+    Mods.LoadedMod load = Vars.mods.getMod(Main.class);
     if(load == null) throw new IllegalArgumentException("Mod is not loaded yet (or missing)!");
+    meta.version = "2.4.4";
     return meta = load.meta;
   }
 

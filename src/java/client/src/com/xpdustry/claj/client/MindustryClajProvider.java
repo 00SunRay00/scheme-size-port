@@ -69,7 +69,7 @@ public class MindustryClajProvider implements ClajProvider {
     mindustryServer = Reflect.get(mindustryProvider, "server"); // Safe, we already know that is ArcNetProvider
     mindustryServerDispatcher = Reflect.get(mindustryServer, "dispatchListener"); // Safe, never changed
     mindustrySerializer = new PacketSerializer();
-    clajVersion = ClajVersion.of("2.4.2");
+    clajVersion = ClajVersion.of("2.4.4");
     implType = ClajType.of("Mindustry");
 
     // Hook Connect listener, so that magic join packet is send before ConnectPacket
@@ -84,6 +84,15 @@ public class MindustryClajProvider implements ClajProvider {
         connect.get(p);
       });
     }
+
+    // Save network errors for bug report
+    Cons<Throwable> last = ArcNet.errorHandler;
+    ArcNet.errorHandler = e -> {
+      ClajProxy proxy = Claj.get().proxies.get();
+      // Avoid saving every errors
+      if (proxy.isConnecting() || proxy.roomCreated()) ClajReport.addError(e);
+      last.get(e);
+    };
   }
 
   @Override
@@ -103,6 +112,7 @@ public class MindustryClajProvider implements ClajProvider {
 
   @Override
   public void handleProxyError(ClajProxy proxy, Throwable error) {
+    ClajReport.addError(error);
     if (proxy.roomCreated()) {
       proxy.quietErrors = true;
       postTask(() -> Vars.ui.showException("@claj.room.error", error));

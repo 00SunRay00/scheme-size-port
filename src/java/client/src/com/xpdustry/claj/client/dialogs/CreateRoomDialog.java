@@ -56,7 +56,7 @@ public class CreateRoomDialog extends BaseDialog {
   final Table custom = new Table(), online = new Table();
   final Section customSection = new Section("custom", custom);
   final Section onlineSection = new Section("online", online);
-  boolean refreshingOnline;
+  boolean refreshingOnline, suggest = true;
 
 
   public CreateRoomDialog() {
@@ -83,8 +83,12 @@ public class CreateRoomDialog extends BaseDialog {
         // Description
         hosts.table(table -> {
           table.labelWrap("@claj.manage.tip").left().growX();
+          Vars.ui.addDescTooltip(table.button(Icon.infoCircle, () -> {
+            Core.app.setClipboardText(ClajReport.formatLastErrors()); // in case of
+            ClajReport.openSuggestionPopup(false);
+          }).right().padLeft(10).growY().get(), "@claj.form.open");
           Vars.ui.addDescTooltip(
-            table.button(Icon.settings, () -> ClajUi.settings.show()).right().padLeft(10).growY().get(),
+            table.button(Icon.settings, () -> ClajUi.settings.show()).right().padLeft(5).growY().get(),
             "@claj.settings.title"
           );
         }).padBottom(24).growX().row();
@@ -247,6 +251,7 @@ public class CreateRoomDialog extends BaseDialog {
     Label label = (Label)tip.container.find(Label.class::isInstance);
     if (label == null) return;
     label.setText(text);
+    tip.container.invalidate();
   }
 
   public void addServer(Server server, Section section) {
@@ -299,14 +304,14 @@ public class CreateRoomDialog extends BaseDialog {
   public void pingServer(Server server, Table dest, Section section, Runnable done, Runnable failed) {
     server.table = dest;
 
+    dest.clear();
+    dest.label(() -> Strings.animated(Time.time, 4, 11, ".")).pad(2).color(Pal.accent).left();
+
     if (server.ping == Integer.MIN_VALUE) return;
     if (server.ping >= 0) {
       displayPing(server, dest);
       return;
     }
-
-    dest.clear();
-    dest.label(() -> Strings.animated(Time.time, 4, 11, ".")).pad(2).color(Pal.accent).left();
 
     server.ping = Integer.MIN_VALUE;
     Claj.get().pingHost(server.address, server.port, s -> {
@@ -350,13 +355,20 @@ public class CreateRoomDialog extends BaseDialog {
     Vars.ui.loadfrag.show("@claj.manage.creating-room");
     // Disconnect the client if the room is not created after 10 seconds
     Timer.Task t = Timer.schedule(this::closeRoom, 10);
+    Timer.Task[] suggestion = {null};
 
     ClajUi.settings.setSettings();
     Claj.get().createRoom(selected.address, selected.port, l -> {
       Vars.ui.loadfrag.hide();
       t.cancel();
       link = l;
+      // Suggest after 1 hour of hosting and one per game launch
+      if (suggest && ClajReport.shouldSuggest()) {
+        suggest = false;
+        suggestion[0] = Timer.schedule(ClajReport::openSuggestionPopup, 1 * 60 * 60);
+      }
     }, c -> {
+      if (suggestion[0] != null) suggestion[0].cancel();
       Vars.ui.loadfrag.hide();
       t.cancel();
       switch (c) {
@@ -364,7 +376,7 @@ public class CreateRoomDialog extends BaseDialog {
           break;
         case error, closed:
           if (link == null) {
-            Vars.ui.showErrorMessage("@claj.manage.room-creation-failed");
+            ClajReport.showErrorMessage("@claj.manage.room-creation-failed");
             break;
           }
           //$FALL-THROUGH$
@@ -373,6 +385,9 @@ public class CreateRoomDialog extends BaseDialog {
       }
       link = null;
     }, e -> {
+      if (suggestion[0] != null) suggestion[0].cancel();
+      // Simpler to show two popups instead of hacking the error one to just add one button
+      if (ClajReport.filterException(e)) ClajReport.reportException(e);
       Vars.net.handleException(e);
       t.cancel();
     });
@@ -387,10 +402,13 @@ public class CreateRoomDialog extends BaseDialog {
         Claj.get().provider.showTextMessage(Claj.get().proxies.get(), Core.bundle.get(key));
         //$FALL-THROUGH$
       case closed, serverClosed:
-        Vars.ui.showText("", '@'+key);
+        Vars.ui.showText("", '@' + key);
+        break;
+      case error:
+        ClajReport.showErrorMessage('@' + key);
         break;
       default:
-        Vars.ui.showErrorMessage('@'+key);
+        Vars.ui.showErrorMessage('@' + key);
     }
   }
 

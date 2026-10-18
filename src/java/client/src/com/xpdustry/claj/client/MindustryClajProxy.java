@@ -19,6 +19,7 @@
 
 package com.xpdustry.claj.client;
 
+import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
@@ -115,4 +116,11 @@ public class MindustryClajProxy extends ClajProxy {
     host.port = Core.settings.getInt("port", Vars.port);
     return host;
   }
+
+  @Override
+  public void connect(String host, int port) throws IOException {
+    ClajReport.clearErrors();
+    super.connect(host, port);
+  }
+
 }

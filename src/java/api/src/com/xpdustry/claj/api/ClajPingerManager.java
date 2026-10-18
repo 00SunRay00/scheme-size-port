@@ -141,8 +141,7 @@ public class ClajPingerManager {
   public void stop() {
     cancel();
     for (ClajPinger pinger : pingers) {
-      if (pinger == null) continue;
-      pinger.stop();
+      if (pinger != null) pinger.stop();
     }
   }
 

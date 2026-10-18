@@ -36,6 +36,7 @@ import mindustry.ui.dialogs.BaseDialog;
 import com.xpdustry.claj.api.Claj;
 import com.xpdustry.claj.api.ClajLink;
 import com.xpdustry.claj.api.ClajPinger;
+import com.xpdustry.claj.client.ClajReport;
 import com.xpdustry.claj.client.ClajUi;
 import com.xpdustry.claj.common.status.RejectReason;
 
@@ -43,7 +44,7 @@ import com.xpdustry.claj.common.status.RejectReason;
 public class JoinDialog extends BaseDialog {
   boolean valid;
   String output;
-  final TextField linkField = new TextField("claj://");
+  final TextField linkField = new TextField(ClajLink.SCHEME);
   ClajLink lastLink;
   short lastPassword = ClajPinger.NO_PASSWORD;
 
@@ -65,7 +66,11 @@ public class JoinDialog extends BaseDialog {
       Vars.ui.addDescTooltip(table.button(Icon.paste, Styles.emptyi, this::importLink).size(50f).padLeft(5)
                                   .get(), "@schematic.copy.import");
       table.row().add();
-      table.labelWrap(() -> output).left().growX().padTop(5).row();
+      table.labelWrap(() -> output).top().left().growX().padTop(5);
+      Vars.ui.addDescTooltip(table.button(Icon.infoCircle, Styles.emptyi, () -> {
+        Core.app.setClipboardText(ClajReport.formatLastErrors()); // in case of
+        ClajReport.openSuggestionPopup(false);
+      }).size(50f).padLeft(5).get(), "@claj.form.open");
     }).row();
 
     buttons.defaults().size(140f, 60f).pad(4f);
@@ -138,12 +143,16 @@ public class JoinDialog extends BaseDialog {
         Vars.ui.join.hide();
         ClajUi.browser.hide();
         hide();
-      }, r -> joinError(link, r),
+      },
+      r -> joinError(link, r),
       e -> {
         if (ignore[0]) return;
         String msg = e.getMessage();
         if (msg != null && msg.contains("timed out")) joinError(link, RejectReason.roomNotFound);
-        else Vars.net.handleException(e);
+        else {
+          if (ClajReport.filterException(e)) ClajReport.reportException(e);
+          Vars.net.handleException(e);
+        }
       });
     });
   }
@@ -161,6 +170,7 @@ public class JoinDialog extends BaseDialog {
         //$FALL-THROUGH$
       default:
     }
+
     Vars.ui.showErrorMessage("@claj.reject." + Strings.camelToKebab(reason.name()));
   }
 

@@ -70,6 +70,7 @@ public class SchemeVars {
                     return;
                 }
 
+
                 FrameBuffer fb = new FrameBuffer(base.width, base.height);
                 fb.begin();
 
@@ -109,6 +110,7 @@ public class SchemeVars {
         });
         Events.on(EventType.ClientCreateEvent.class,event ->updateContent());
         // m_schematics is created in Main to prevent dual loading
+        if(mods.getMod("claj") == null || !mods.getMod("claj").enabled())new com.xpdustry.claj.client.Main().init();
         m_input = mobile ? new ModedMobileInput() : new ModedDesktopInput();
 
         rulesetter = new RuleSetterDialog();

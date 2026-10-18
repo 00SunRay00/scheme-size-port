@@ -653,4 +653,13 @@ public class Strings extends arc.util.Strings {
 
     return builder.toString();
   }
+
+  public static String wordTruncate(String str, int length) { return wordTruncate(str, length, ""); }
+  /** https://stackoverflow.com/a/17188686 */
+  public static String wordTruncate(String str, int length, String ellipsis) {
+    if (str.length() <= length) return str;
+    String result = str.substring(0, length);
+    if (str.charAt(length) != ' ') result = result.substring(0, result.lastIndexOf(" "));
+    return result + ellipsis;
+  }
 }

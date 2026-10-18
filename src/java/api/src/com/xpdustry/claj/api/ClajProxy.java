@@ -89,9 +89,8 @@ public class ClajProxy extends ProxyClient {
     receiver.handle(ClajPopupPacket.class, p -> postTask(provider::showPopup, this, p.message));
   }
 
-  /** This method must be used instead of others connect methods */
-  public void connect(String host, int port, Cons<ClajLink> created, Cons<CloseReason> closed,
-                      Cons<Throwable> failed) {
+  public void createRoom(String host, int port, Cons<ClajLink> created, Cons<CloseReason> closed,
+                         Cons<Throwable> failed) {
     try {
       connect(host, port);
       roomCreated = created;
@@ -112,7 +111,9 @@ public class ClajProxy extends ProxyClient {
   protected void runRoomCreated(long roomId) {
     if (roomCreated()) return;
     this.roomId = roomId;
-    link = new ClajLink(connectHost.getHostName(), connectTcpPort, roomId);
+    String address = getRemoteAddressTCP() != null ? getRemoteAddressTCP().getHostString() : connectHost.getHostName();
+    link = new ClajLink(address, connectTcpPort, roomId);
+
     // 0 is not allowed since it's used to specify an uncreated room
     if (roomId == UNCREATED_ROOM) {
       runRoomClose(CloseReason.error);
@@ -140,6 +141,7 @@ public class ClajProxy extends ProxyClient {
     close();
     quietErrors = false;
     testingBroadcast = false;
+    broadcastSupported = true;
   }
 
   /** {@code 0} means no room created. */
@@ -203,12 +205,16 @@ public class ClajProxy extends ProxyClient {
 
   // Region callbacks
 
+  protected boolean isBroadcast(int conId) {
+    return broadcastSupported && conId == CON_BROADCAST;
+  }
+
   /** @return {@code null} if room isn't created or if {@code conId} is {@link #CON_BROADCAST}. */
   @Override
   protected VirtualConnection conConnected(int conId, long addressHash) {
     if (!roomCreated()) return null;
     // Of course broadcasting a connect event makes no sense.
-    if (conId == CON_BROADCAST) return null;
+    if (isBroadcast(conId)) return null;
     VirtualConnection con = getConnection(conId); // avoid multiple connect events
     return con == null ? super.conConnected(conId, addressHash) : con;
   }
@@ -217,12 +223,12 @@ public class ClajProxy extends ProxyClient {
   @Override
   protected VirtualConnection conDisconnected(int conId, DcReason reason) {
     if (!roomCreated()) return null;
-    if (conId != CON_BROADCAST) return super.conDisconnected(conId, reason);
     if (testingBroadcast && reason == DcReason.error &&
         Time.timeSinceMillis(broadcastTestStart) < broadcastTestTimeout) {
       testingBroadcast = broadcastSupported = false;
       return null;
     }
+    if (!isBroadcast(conId)) return super.conDisconnected(conId, reason);
     eachConnections(c -> closeQuietly(c, reason));
     return null;
   }
@@ -231,7 +237,7 @@ public class ClajProxy extends ProxyClient {
   @Override
   protected VirtualConnection conReceived(int conId, Object object) {
     if (!roomCreated()) return null;
-    if (conId != CON_BROADCAST) return super.conReceived(conId, object);
+    if (!isBroadcast(conId)) return super.conReceived(conId, object);
     eachConnections(c -> c.notifyReceived0(object));
     return null;
   }
@@ -240,7 +246,7 @@ public class ClajProxy extends ProxyClient {
   @Override
   protected VirtualConnection conIdle(int conId) {
     if (!roomCreated()) return null;
-    if (conId != CON_BROADCAST) return super.conIdle(conId);
+    if (!isBroadcast(conId)) return super.conIdle(conId);
     eachConnections(VirtualConnection::notifyIdle0);
     return null;
   }

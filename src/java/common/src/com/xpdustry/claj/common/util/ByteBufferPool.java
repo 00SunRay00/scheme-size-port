@@ -48,9 +48,9 @@ public final class ByteBufferPool {
   /** Optimization to avoid a bucket with only empty buffers. */
   private static final ByteBuffer EMPTY_HEAP = ByteBuffer.allocate(0),
                                   EMPTY_DIRECT = ByteBuffer.allocateDirect(0);
+  private static final Function<Integer, Pool<ByteBuffer>> NEW_BUCKET = _ -> new Pool<>(() -> null);
 
   protected final ConcurrentHashMap<Integer, Pool<ByteBuffer>> heaps, directs;
-  protected final Function<Integer, Pool<ByteBuffer>> newBucket;
   public final int factor, bucketCap;
 
   /** Creates a buffer pool with a default {@link #factor} and {@link #bucketCap} of {@code 1024}. */
@@ -63,7 +63,6 @@ public final class ByteBufferPool {
     this.directs = new ConcurrentHashMap<>(8);
     this.factor = factor;
     this.bucketCap = bucketCap;
-    this.newBucket = _ -> new Pool<>(() -> null); // Buffer allocation is handled else where
   }
 
   protected ConcurrentHashMap<Integer, Pool<ByteBuffer>> getBuckets(boolean direct) {
@@ -110,7 +109,7 @@ public final class ByteBufferPool {
     if (buf == null) return false;
     int capaticy = buf.capacity();
     if (capaticy <= 0 || capaticy % factor != 0) return false;
-    return getBuckets(buf.isDirect()).computeIfAbsent(capaticy / factor, newBucket).offer(buf);
+    return getBuckets(buf.isDirect()).computeIfAbsent(capaticy / factor, NEW_BUCKET).offer(buf);
   }
 
   /** Fill a {@code bucket} completely. */
@@ -126,7 +125,7 @@ public final class ByteBufferPool {
   public void fill(int bucket, int size, boolean direct) {
     if (size <= 0 || bucket <= 0) return;
     int capacity = bucket * factor;
-    Pool<ByteBuffer> b = getBuckets(direct).computeIfAbsent(bucket, newBucket);
+    Pool<ByteBuffer> b = getBuckets(direct).computeIfAbsent(bucket, NEW_BUCKET);
     for (int i=0; i<size; i++) {
       if (!b.offer(newBuffer(direct, capacity))) return;
     }

@@ -139,8 +139,7 @@ public class ClajProxyManager {
   /** Search whether a proxy have an open room. */
   public boolean hasOpenRoom() {
     for (ClajProxy proxy : proxies) {
-      if (proxy == null) continue;
-      if (proxy.roomCreated()) return true;
+      if (proxy != null && proxy.roomCreated()) return true;
     }
     return false;
   }
@@ -210,7 +209,7 @@ public class ClajProxyManager {
     reserved[index] = true;
 
     Runnable task = () -> {
-      proxy.connect(host, port, created, reason -> {
+      proxy.createRoom(host, port, created, reason -> {
         if (closed != null) closed.get(reason);
         reserved[index] = false;
       }, error -> {
