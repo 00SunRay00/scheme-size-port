@@ -51,6 +51,11 @@ dependencies {
 
     compileOnly files("libs/jabel-1.1.0.jar")
     annotationProcessor files("libs/jabel-1.1.0.jar")
+
+    testImplementation "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    testImplementation "com.github.Anuken.Arc:arcnet:$mindustryVersion"
+    testImplementation "com.github.Anuken.Mindustry:core:$mindustryVersion"
+    testImplementation 'junit:junit:4.13.2'
 }
 
 tasks.jar {
