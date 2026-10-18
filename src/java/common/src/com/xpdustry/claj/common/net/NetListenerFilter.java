@@ -25,10 +25,12 @@ import arc.net.DcReason;
 
 public interface NetListenerFilter {
   NetListenerFilter defaultFilter = new NetListenerFilter() {};
+  NetListenerFilter noIdleFilter = new NetListenerFilter() {
+    public boolean allowIdle(Connection connection) { return false; }
+  };
 
-  default boolean connected(Connection connection) { return true; }
-  default boolean disconnected(Connection connection, DcReason reason) { return true; }
-  default boolean received(Connection connection, Object object) { return true; }
-  /** In general idle events are always discarded. */
-  default boolean idle(Connection connection) { return false; }
+  default boolean allowConnected(Connection connection) { return true; }
+  default boolean allowDisconnected(Connection connection, DcReason reason) { return true; }
+  default boolean allowReceived(Connection connection, Object object) { return true; }
+  default boolean allowIdle(Connection connection) { return true; }
 }

@@ -21,49 +21,43 @@ package com.xpdustry.claj.common.net;
 
 import java.nio.ByteBuffer;
 
-import arc.net.FrameworkMessage;
-import arc.net.NetSerializer;
-import arc.net.FrameworkMessage.DiscoverHost;
-import arc.net.FrameworkMessage.KeepAlive;
-import arc.net.FrameworkMessage.Ping;
-import arc.net.FrameworkMessage.RegisterTCP;
-import arc.net.FrameworkMessage.RegisterUDP;
+import arc.net.*;
+import arc.net.FrameworkMessage.*;
 
 
 public interface FrameworkSerializer extends NetSerializer {
-
   default void writeFramework(ByteBuffer buffer, FrameworkMessage message) {
-    if (message instanceof Ping ping) buffer.put((byte)0).putInt(ping.id).put(ping.isReply ? (byte)1 : 0);
-    else if (message instanceof DiscoverHost) buffer.put((byte)1);
-    else if (message instanceof KeepAlive) buffer.put((byte)2);
-    else if (message instanceof RegisterUDP udp) buffer.put((byte)3).putInt(udp.connectionID);
-    else if (message instanceof RegisterTCP tcp) buffer.put((byte)4).putInt(tcp.connectionID);
-  }
-
-  default FrameworkMessage readFramework(ByteBuffer buffer) {
-    byte id = buffer.get();
-
-    if (id == 0) {
-      Ping p = new Ping();
-      p.id = buffer.getInt();
-      p.isReply = buffer.get() == 1;
-      return p;
-    } else if (id == 1) {
-      return FrameworkMessage.discoverHost;
-    } else if (id == 2) {
-      return FrameworkMessage.keepAlive;
-    } else if (id == 3) {
-      RegisterUDP p = new RegisterUDP();
-      p.connectionID = buffer.getInt();
-      return p;
-    } else if (id == 4) {
-      RegisterTCP p = new RegisterTCP();
-      p.connectionID = buffer.getInt();
-      return p;
-    } else {
-      throw new RuntimeException("Unknown framework message!");
+    switch (message) {
+      case Ping ping -> buffer.put((byte)0).putInt(ping.id).put(ping.isReply ? (byte)1 : 0);
+      case DiscoverHost _ -> buffer.put((byte)1);
+      case KeepAlive _ -> buffer.put((byte)2);
+      case RegisterUDP udp -> buffer.put((byte)3).putInt(udp.connectionID);
+      case RegisterTCP tcp -> buffer.put((byte)4).putInt(tcp.connectionID);
+      default -> throw new ArcNetException("Unknown framework message type: " + message.getClass().getName());
     }
   }
 
-  //byte frameworkId();
+  default FrameworkMessage readFramework(ByteBuffer buffer) {
+    return switch (buffer.get()) {
+      case 0 -> {
+        Ping p = new Ping();
+        p.id = buffer.getInt();
+        p.isReply = buffer.get() == 1;
+        yield p;
+      }
+      case 1 -> FrameworkMessage.discoverHost;
+      case 2 -> FrameworkMessage.keepAlive;
+      case 3 -> {
+        RegisterUDP p = new RegisterUDP();
+        p.connectionID = buffer.getInt();
+        yield p;
+      }
+      case 4 -> {
+        RegisterTCP p = new RegisterTCP();
+        p.connectionID = buffer.getInt();
+        yield p;
+      }
+      default -> throw new ArcNetException("Unknown framework message!");
+    };
+  }
 }

@@ -23,7 +23,7 @@ import arc.util.io.ByteBufferInput;
 import arc.util.io.ByteBufferOutput;
 
 
-public class RoomConfigPacket extends DelayedPacket {
+public class RoomConfigPacket implements Packet {
   /** Whether the room is visible in the explorer. */
   public boolean isPublic;
   /** Whether a password is needed to join the room. This doens't means that the connection will be encrypted! */
@@ -36,7 +36,7 @@ public class RoomConfigPacket extends DelayedPacket {
   public int maxClients;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
+  public void read(ByteBufferInput read) {
     int data = read.readUnsignedByte();
     isPublic =     (data & 0b0100) == 0b0100;
     isProtected =  (data & 0b0010) == 0b0010;
@@ -54,9 +54,9 @@ public class RoomConfigPacket extends DelayedPacket {
     write.writeShort(password);
     write.writeChar(maxClients);
   }
-    
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return isServer; 
+  public boolean allow(boolean isServer) {
+    return isServer;
   }
 }

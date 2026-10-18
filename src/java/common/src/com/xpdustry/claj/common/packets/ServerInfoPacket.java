@@ -23,13 +23,13 @@ import arc.util.io.ByteBufferInput;
 import arc.util.io.ByteBufferOutput;
 
 
-public class ServerInfoPacket extends DelayedPacket {
+public class ServerInfoPacket implements Packet {
   public int version = -1;
-  //TODO: add current server load: number of rooms, max rooms (if any), 
+  //TODO: add current server load: number of rooms, max rooms (if any),
   //      number of clients, max allowed clients per room, maybe an health status?
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
+  public void read(ByteBufferInput read) {
     // By default, arc server is configured to reply an empty buffer.
     // This can be used to determine whether this is an old CLaJ server or not.
     // Because on older versions, no discovery was configured.
@@ -40,9 +40,9 @@ public class ServerInfoPacket extends DelayedPacket {
   public void write(ByteBufferOutput write) {
     write.writeInt(version);
   }
-    
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return !isServer; 
+  public boolean allow(boolean isServer) {
+    return !isServer;
   }
 }

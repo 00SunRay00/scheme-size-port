@@ -45,7 +45,7 @@ public class Main extends Mod {
         RainbowTeam.load();
         SBinding.load();
         ModedGlyphLayout.load();
-        if(mods.getMod("claj") == null || !mods.getMod("claj").enabled())new com.xpdustry.claj.client.Main().init();
+
 
         ui.schematics = schemas;
         ui.listfrag = listfrag;
@@ -58,6 +58,7 @@ public class Main extends Mod {
         hudfrag.build(ui.hudGroup);
         listfrag.build(ui.hudGroup);
         shortfrag.build(ui.hudGroup);
+        consolefrag.build();
         corefrag.build(ui.hudGroup);
 
         control.setInput(m_input.asHandler());

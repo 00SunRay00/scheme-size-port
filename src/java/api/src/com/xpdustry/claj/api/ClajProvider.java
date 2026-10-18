@@ -24,15 +24,22 @@ import java.util.concurrent.ExecutorService;
 
 import arc.net.NetListener;
 
-import com.xpdustry.claj.common.packets.ConnectionPacketWrapPacket.Serializer;
+import com.xpdustry.claj.common.packets.RoomStatePacket;
+import com.xpdustry.claj.common.packets.ConnectionPayloadPacket.Serializer;
 import com.xpdustry.claj.common.status.*;
 
 
-/** Interface to provide implementation dependent client-side things. */
+/**
+ * Interface to provide client implementation dependent things.
+ * <p>
+ * Everything must be thread-safe, as they will be run on proxy, pinger or calling thread. <br>
+ * With exception of proxy/pinger callbacks, including {@code show*} and {@link #connectClient} methods,
+ * as they will be posted to the main thread via {@link #postTask}.
+ */
 public interface ClajProvider {
-  /** Used to post tasks to the main thread, when receiving a packet or running a callback. */
-  default void postTask(Runnable task) { task.run(); }
-  /** Executor used to post connection tasks. If {@code null}, these operations will be blocking. */
+  /** Used to post tasks to the main thread, when receiving a packet or running callbacks. */
+  void postTask(Runnable task);
+  /** Executor used to post blocking connection tasks. If {@code null}, they will run and block the current thread. */
   default ExecutorService getExecutor() { return null; }
   // /** The ping executor used to post blocking ping tasks. */
   // default ExecutorService getPingExecutor() { return getExecutor(); }
@@ -65,15 +72,18 @@ public interface ClajProvider {
    */
   ClajVersion getVersion();
 
-  /** Listener to add to all virtual connections. Can be {@code null}. */
+  /**
+   * Listener where events are runs, added to all virtual connections. Can be {@code null}. <br>
+   * Be aware that the events will be called from the proxy thread.
+   * So you likely want to post them to another thread or whatever you want, to avoid slowing the proxy.
+   */
   default NetListener getConnectionListener(ClajProxy proxy) { return null; }
 
   /**
-   * The actual room state, in an encoded form. <br>
+   * The actual room state, in an encoded form. (must be flipped for send) <br>
    * Will be requested by the server if needed. {@code null} can be returned to not provide state.
    * <p>
-   * <b>The buffer size must be less than {@code 2^16} ({@code 65536}). </b>
-   * @apiNote The buffer must not be flipped rn.
+   * Max buffer size is {@code 8128}, as defined in {@link RoomStatePacket#MAX_BUFF_SIZE}.
    */
   default ByteBuffer writeRoomState(ClajProxy proxy) { return null; }
   /** Decode the room state received by the server. */

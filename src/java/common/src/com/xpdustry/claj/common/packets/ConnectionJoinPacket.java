@@ -27,8 +27,8 @@ public class ConnectionJoinPacket extends ConnectionWrapperPacket {
   public long addressHash;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
-    super.readImpl(read);
+  public void read(ByteBufferInput read) {
+    super.read(read);
     addressHash = read.readLong();
   }
 
@@ -37,9 +37,9 @@ public class ConnectionJoinPacket extends ConnectionWrapperPacket {
     super.write(write);
     write.writeLong(addressHash);
   }
-    
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return !isServer; 
+  public boolean allow(boolean isServer) {
+    return !isServer;
   }
 }

@@ -25,7 +25,7 @@ import arc.func.Cons;
 import arc.struct.Seq;
 
 import com.xpdustry.claj.common.ClajPackets;
-import com.xpdustry.claj.common.packets.ConnectionPacketWrapPacket;
+import com.xpdustry.claj.common.packets.ConnectionPayloadPacket;
 import com.xpdustry.claj.common.status.*;
 
 
@@ -47,7 +47,7 @@ public class Claj {
   }
 
   /**
-   * Initializes the global CLaJ manager, and the {@link ConnectionPacketWrapPacket} serializer.
+   * Initializes the global CLaJ manager, and the {@link ConnectionPayloadPacket} serializer.
    * @param provider the implementation specific things
    * @param proxies number of pooled proxies
    * @param pingers number of pooled pingers
@@ -55,7 +55,7 @@ public class Claj {
   public static Claj init(ClajProvider provider, int proxies, int pingers) {
     if (initialized()) throw new IllegalStateException("Claj is already initialized");
     ClajPackets.init(); // Register packets first
-    ConnectionPacketWrapPacket.serializer = provider.getPacketWrapperSerializer();
+    ConnectionPayloadPacket.serializer = provider.getPacketWrapperSerializer();
     INSTANCE = new Claj(provider, new ClajProxyManager(provider, proxies),
                         new ClajPingerManager(provider, pingers));
     return INSTANCE;

@@ -47,8 +47,8 @@ public class AddressUtil {
     bytes[0] = (byte)0xfd;
 
     // Fill the last 8 bytes with the hash
-    for (int i = 0; i < 8; i++) {
-      bytes[8 + i] = (byte)((addressHash >> ((7 - i) * 8)) & 0xFF);
+    for (int i = 0; i < Long.BYTES; i++) {
+      bytes[Long.BYTES + i] = (byte)((addressHash >> ((7 - i) * 8)) & 0xFF);
     }
 
     try { return InetAddress.getByAddress(bytes); }

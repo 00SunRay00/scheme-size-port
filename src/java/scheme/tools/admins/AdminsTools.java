@@ -70,7 +70,7 @@ public interface AdminsTools {
 
     void teleport(Position pos);
 
-    default void teleport(Boolean isButton){teleport(getTeleportPosition(isButton));}
+    default void teleport(boolean isButton){teleport(getTeleportPosition(isButton));}
 
     default Position getTeleportPosition(boolean isButton) {
         if (mobile || isButton) return PositionBuild.GetPosition(camera.position.x,camera.position.y);
@@ -103,9 +103,9 @@ public interface AdminsTools {
 
     boolean unusable();
 
-    default int fixAmount(Item item, Float amount) {
+    default int fixAmount(Item item, float amount) {
         int items = player.core().items.get(item);
-        return amount == 0f || items + amount < 0 ? -items : amount.intValue();
+        return amount == 0f || items + amount < 0 ? -items : (int) amount;
     }
 
     default boolean canCreate(Team team, UnitType type) {

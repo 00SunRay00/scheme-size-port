@@ -56,6 +56,7 @@ public class SchemeVars {
     public static HudFragment hudfrag;
     public static PlayerListFragment listfrag;
     public static ShortcutFragment shortfrag;
+    public static ConsoleFragment consolefrag;
     public static CoreInfoFragment corefrag;
 
     public static ServerUtils serverUtils;
@@ -68,6 +69,7 @@ public class SchemeVars {
                     Log.err("Region scheme-size-status-invincible not found in atlas!");
                     return;
                 }
+
 
                 FrameBuffer fb = new FrameBuffer(base.width, base.height);
                 fb.begin();
@@ -108,6 +110,7 @@ public class SchemeVars {
         });
         Events.on(EventType.ClientCreateEvent.class,event ->updateContent());
         // m_schematics is created in Main to prevent dual loading
+        if(mods.getMod("claj") == null || !mods.getMod("claj").enabled())new com.xpdustry.claj.client.Main().init();
         m_input = mobile ? new ModedMobileInput() : new ModedDesktopInput();
 
         rulesetter = new RuleSetterDialog();
@@ -133,6 +136,7 @@ public class SchemeVars {
         hudfrag = new HudFragment();
         listfrag = new PlayerListFragment();
         shortfrag = new ShortcutFragment();
+        consolefrag = new ConsoleFragment();
         corefrag = new CoreInfoFragment();
 
         serverUtils = new ServerUtils();

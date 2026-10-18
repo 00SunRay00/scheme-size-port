@@ -19,31 +19,29 @@
 
 package com.xpdustry.claj.common.packets;
 
-import java.nio.ByteBuffer;
-
 import arc.net.ArcNetException;
 import arc.util.io.ByteBufferInput;
 import arc.util.io.ByteBufferOutput;
 
 
 /** Special packet for connection packet wrapping. */
-public class ConnectionPacketWrapPacket extends ConnectionWrapperPacket {
+public class ConnectionPayloadPacket extends ConnectionWrapperPacket {
   /** Used to notify serializer to read/write the rest. MUST BE SET! */
   public static Serializer serializer;
 
-  /** Decoded object received by the client. Should be handled by the serializer. */
+  /** Decoded object received by the client. */
   public Object object;
-  /** Copy of the raw packet received by the server. Should be handled by the serializer. */
-  public ByteBuffer raw;
+  /** Copy of the raw packet received by the server. Must be freed after writing. */
+  public RawPacket raw;
 
   public boolean isTCP;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
-    super.readImpl(read);
+  public void read(ByteBufferInput read) {
+    super.read(read);
     isTCP = read.readBoolean();
     if (serializer == null)
-      throw new ArcNetException("ConnectionPacketWrapPacket.serializer is not set!");
+      throw new ArcNetException(getClass().getSimpleName() + ".serializer is not set!");
     serializer.read(this, read);
   }
 
@@ -52,13 +50,13 @@ public class ConnectionPacketWrapPacket extends ConnectionWrapperPacket {
     super.write(write);
     write.writeBoolean(isTCP);
     if (serializer == null)
-      throw new ArcNetException("ConnectionPacketWrapPacket.serializer is not set!");
+      throw new ArcNetException(getClass().getSimpleName() + ".serializer is not set!");
     serializer.write(this, write);
   }
 
-  
+
   public interface Serializer {
-    void read(ConnectionPacketWrapPacket packet, ByteBufferInput read);
-    void write(ConnectionPacketWrapPacket packet, ByteBufferOutput write);
+    void read(ConnectionPayloadPacket packet, ByteBufferInput read);
+    void write(ConnectionPayloadPacket packet, ByteBufferOutput write);
   }
 }

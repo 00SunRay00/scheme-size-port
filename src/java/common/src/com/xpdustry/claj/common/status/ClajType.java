@@ -23,6 +23,9 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+import arc.util.io.ByteBufferInput;
+import arc.util.io.ByteBufferOutput;
+
 
 /**
  * Must be in ASCII, {@code 16} <u>BYTES</u> max, and without spaces. <br>
@@ -96,12 +99,26 @@ public class ClajType {
     out.put(rawType);
   }
 
+  public void write(ByteBufferOutput out) {
+    out.write(rawType.length);
+    out.write(rawType);
+  }
+
   /** @see #decode(byte[]) */
   public static ClajType read(ByteBuffer in) {
     byte size = in.get();
     if (size < 1) throw new IllegalArgumentException("no type specified");
     byte[] data = new byte[size];
     in.get(data);
+    return new ClajType(decode(data), truncate(data, SIZE, false));
+  }
+
+  /** @see #decode(byte[]) */
+  public static ClajType read(ByteBufferInput in) {
+    byte size = in.readByte();
+    if (size < 1) throw new IllegalArgumentException("no type specified");
+    byte[] data = new byte[size];
+    in.readFully(data);
     return new ClajType(decode(data), truncate(data, SIZE, false));
   }
 

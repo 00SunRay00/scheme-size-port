@@ -23,12 +23,12 @@ import arc.util.io.ByteBufferInput;
 import arc.util.io.ByteBufferOutput;
 
 
-public class RoomLinkPacket extends DelayedPacket {
+public class RoomLinkPacket implements Packet {
   /** {@code 0} means no room. */
   public long roomId;
 
   @Override
-  protected void readImpl(ByteBufferInput read) {
+  public void read(ByteBufferInput read) {
     roomId = read.readLong();
   }
 
@@ -36,9 +36,9 @@ public class RoomLinkPacket extends DelayedPacket {
   public void write(ByteBufferOutput write) {
     write.writeLong(roomId);
   }
-    
+
   @Override
-  public boolean allow(boolean isServer) { 
-    return !isServer; 
+  public boolean allow(boolean isServer) {
+    return !isServer;
   }
 }

@@ -29,8 +29,10 @@ import arc.util.io.ReusableByteOutStream;
 
 /**
  * Writes data into a {@link ByteArrayOutputStream}, optionally compressible,
- * and maintains a {@link ByteBuffer} to the data.
- * @apiNote Don't forget to {@link #close} or {@link #flush} after writing!
+ * and maintains a {@link ByteBuffer} to the data. <br>
+ * Backed buffer must not be used for writing, as it's only for viewing purposes.
+ * <p>
+ * Don't forget to {@link #close} or {@link #flush} after writing!
  */
 public class ByteArrayBufferOutput extends ByteBufferOutput implements Closeable, Flushable {
   public final ReusableByteOutStream back;
@@ -50,98 +52,98 @@ public class ByteArrayBufferOutput extends ByteBufferOutput implements Closeable
   public void write(int i) {
     try { stream.write(i); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void write(byte[] b) {
     try { stream.write(b); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void write(byte[] b, int off, int len) {
     try { stream.write(b, off, len); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeBoolean(boolean v) {
     try { stream.writeBoolean(v); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeByte(int v) {
     try { stream.writeByte(v); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeShort(int v) {
     try { stream.writeShort(v); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeChar(int v) {
     try { stream.writeChar(v); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeInt(int v) {
     try { stream.writeInt(v); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeLong(long v) {
     try { stream.writeLong(v); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeFloat(float v) {
     try { stream.writeFloat(v); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeDouble(double v) {
     try { stream.writeDouble(v); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeBytes(String s) {
     try { stream.writeBytes(s); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeChars(String s) {
     try { stream.writeChars(s); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
   @Override
   public void writeUTF(String s) {
     try { stream.writeUTF(s); }
     catch (IOException e) { throw new RuntimeException(e); }
-    //updateBuffer();
+    updateBuffer();
   }
 
  @Override

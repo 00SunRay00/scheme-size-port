@@ -24,7 +24,7 @@ import arc.util.io.ByteBufferInput;
 import arc.util.io.ByteBufferOutput;
 
 
-/** Base packet of CLaJ protocol. Packets should be handled in the same thread. */
+/** Base packet of CLaJ protocol. */
 public interface Packet {
   default void read(ByteBufferInput read) {}
   default void write(ByteBufferOutput write) {}
@@ -40,11 +40,8 @@ public interface Packet {
     return (T)this;
   }
 
-  /** @return whether this packet should be allowed or ignored, for this type of endpoint. */
+  /** @return whether this packet should be allowed or ignored, for the type of endpoint. */
   default boolean allow(boolean isServer){ return true; }
-
-  /** Called when handling the packet (after reading), in another thread. */
-  default void handled() {}
 
   /** Called when the client handle this packet. Only called when no listener is defined for this packet. */
   default void handleClient() {}
