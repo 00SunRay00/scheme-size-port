@@ -1,10 +1,16 @@
 package scheme.tools;
 
 import arc.Events;
+import arc.func.Boolf2;
 import arc.func.Cons;
 import arc.func.Cons2;
 import arc.func.Cons4;
 import arc.math.Mathf;
+import arc.math.geom.Geometry;
+import arc.math.geom.Point2;
+import arc.struct.IntQueue;
+import arc.struct.IntSeq;
+import arc.struct.IntSet;
 import arc.struct.Seq;
 import arc.util.Strings;
 import mindustry.content.Items;
@@ -32,6 +38,9 @@ public class BuildingTools {
 
     public InputHandler input;
     public Seq<Mode> useful;
+
+    /** Cap for a single replace flood fill on floor, overlay or environment blocks. */
+    public static final int maxFillCells = 16384;
 
     public Mode mode = Mode.none;
     public int size = 8;
@@ -85,7 +94,7 @@ public class BuildingTools {
             iterated = tile.floor();
             if (iterated == null || block() == iterated) return;
             tileLayer = TileLayer.floor;
-            try { iterateTile(tile); } catch (Throwable e) { Main.error(e); }
+            fillTile(tile);
             return;
         }
 
@@ -93,7 +102,7 @@ public class BuildingTools {
             iterated = tile.overlay();
             if (iterated == null || block() == iterated) return;
             tileLayer = TileLayer.overlay;
-            try { iterateTile(tile); } catch (Throwable e) { Main.error(e); }
+            fillTile(tile);
             return;
         }
 
@@ -102,7 +111,7 @@ public class BuildingTools {
             if (!(iterated instanceof Prop) && !(iterated instanceof StaticWall)) return;
             if (block() == iterated) return;
             tileLayer = TileLayer.block;
-            try { iterateTile(tile); } catch (Throwable e) { Main.error(e); }
+            fillTile(tile);
             return;
         }
 
@@ -146,17 +155,40 @@ public class BuildingTools {
         return tile.block();
     }
 
-    private void iterateTile(Tile tile) {
-        if (tile == null) return;
-        if (tileBlockAt(tile) != iterated) return;
+    private void fillTile(Tile tile) {
+        // air is the empty overlay/block layer: filling it would cover the whole map
+        if (iterated == mindustry.content.Blocks.air) return;
+        // replace() runs every frame while held; the region is already planned
         if (plan.contains(p -> p.x == tile.x && p.y == tile.y)) return;
 
-        plan(tile.x, tile.y, 0);
+        IntSeq cells = floodFill(tile.x, tile.y, world.width(), world.height(), maxFillCells,
+                (x, y) -> tileBlockAt(world.tile(x, y)) == iterated);
+        for (int i = 0; i < cells.size; i++) plan(Point2.x(cells.items[i]), Point2.y(cells.items[i]), 0);
+    }
 
-        iterateTile(world.tile(tile.x + 1, tile.y));
-        iterateTile(world.tile(tile.x - 1, tile.y));
-        iterateTile(world.tile(tile.x, tile.y + 1));
-        iterateTile(world.tile(tile.x, tile.y - 1));
+    /** Packed positions (Point2.pack) of the 4-connected region around (x, y) whose cells pass the filter, at most limit cells. */
+    public static IntSeq floodFill(int x, int y, int width, int height, int limit, Boolf2<Integer, Integer> filter) {
+        IntSeq cells = new IntSeq();
+        if (x < 0 || y < 0 || x >= width || y >= height || !filter.get(x, y)) return cells;
+
+        IntSet visited = new IntSet();
+        IntQueue queue = new IntQueue();
+        int start = Point2.pack(x, y);
+        visited.add(start);
+        queue.addLast(start);
+
+        while (!queue.isEmpty() && cells.size < limit) {
+            int pos = queue.removeFirst();
+            cells.add(pos);
+
+            int cx = Point2.x(pos), cy = Point2.y(pos);
+            for (Point2 d : Geometry.d4) {
+                int nx = cx + d.x, ny = cy + d.y;
+                if (nx < 0 || ny < 0 || nx >= width || ny >= height) continue;
+                if (visited.add(Point2.pack(nx, ny)) && filter.get(nx, ny)) queue.addLast(Point2.pack(nx, ny));
+            }
+        }
+        return cells;
     }
 
     public void connect(int x, int y, Cons2<Integer, Integer> callback) {

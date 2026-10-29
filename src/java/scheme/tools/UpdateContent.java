@@ -27,7 +27,7 @@ public class UpdateContent {
     public static void update(){
         content.blocks().each(block -> {
             block.addBar("health", (Building b) -> new mindustry.ui.Bar(
-                () -> arc.Core.bundle.get("bar.health", "Прочность") + " (" + arc.util.Strings.fixed(Math.max(0f, b.health), 1) + " / " + arc.util.Strings.fixed(b.maxHealth, 1) + ")",
+                () -> arc.Core.bundle.get("stat.health") + " (" + arc.util.Strings.fixed(Math.max(0f, b.health), 1) + " / " + arc.util.Strings.fixed(b.maxHealth, 1) + ")",
                 () -> mindustry.graphics.Pal.health,
                 b::healthf
             ));

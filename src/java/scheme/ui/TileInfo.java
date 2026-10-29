@@ -86,13 +86,13 @@ public class TileInfo {
     }
 
     private static String coreHealthHeader(float health, float maxHealth) {
-        String title = bundle.get("bar.health", "Прочность");
+        String title = bundle.get("stat.health");
         float cur = Math.max(0f, health);
         return title + " (" + Strings.fixed(cur, 1) + " / " + Strings.fixed(maxHealth, 1) + ")";
     }
 
     private static String coreShieldHeader(float shield, float maxHealth) {
-        String title = bundle.get("bar.shield", "Прочность щита");
+        String title = bundle.get("stat.shieldhealth");
         float cur = Math.max(0f, shield);
         return title + " (" + Strings.fixed(cur, 1) + " / " + Strings.fixed(maxHealth, 1) + ")";
     }

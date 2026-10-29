@@ -12,3 +12,7 @@ build/*
 *.bat
 *.xml
 *.directory
+
+# local work notes and test tools, not part of the mod
+specs/
+scripts/

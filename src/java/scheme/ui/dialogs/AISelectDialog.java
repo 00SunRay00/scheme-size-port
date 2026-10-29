@@ -3,6 +3,7 @@ package scheme.ui.dialogs;
 import arc.Events;
 import arc.graphics.Color;
 import arc.graphics.g2d.TextureRegion;
+import arc.scene.ui.Dialog;
 import arc.struct.Seq;
 import mindustry.ai.types.*;
 import mindustry.content.UnitTypes;
@@ -37,7 +38,7 @@ public class AISelectDialog extends ListDialog {
 
         Events.run(WorldLoadEvent.class, this::deselect);
         Events.on(BlockBuildBeginEvent.class, event -> {
-            if (ai instanceof GammaAI gamma && GammaAI.build == Updater.destroy && event.unit.getPlayer() == gamma.target)
+            if (ai instanceof GammaAI gamma && GammaAI.build == Updater.destroy && event.unit != null && event.unit.getPlayer() == gamma.target)
                 gamma.block(event.tile, event.breaking); // crutch but no way
         });
 
@@ -51,7 +52,7 @@ public class AISelectDialog extends ListDialog {
                 new UnitAI(UnitTypes.dagger, new GroundAI()),
                 new UnitAI(UnitTypes.flare, new FlyingAI()),
                 new UnitAI(UnitTypes.renale, new HugAI()),
-                new UnitAI(content.unit(64), new MissileAI()),
+                new UnitAI(content.unit("scathe-missile"), new MissileAI()),
                 new UnitAI(UnitTypes.gamma, new GammaAI()));
 
         list = new List<>(units::each, UnitAI::name, UnitAI::icon, unit -> Pal.accent);
@@ -77,10 +78,16 @@ public class AISelectDialog extends ListDialog {
     }
 
     public void select() {
+        show();
+    }
+
+    /** Rebuilds the lists on every show, so any caller gets a filled dialog. */
+    @Override
+    public Dialog show() {
         players.rebuild();
         list.rebuild();
 
-        show(scene); // call Dialog.show bypassing ListDialog.show
+        return show(scene); // call Dialog.show(Scene) bypassing ListDialog.show, which resets the target to the own player
     }
 
     public void deselect() {

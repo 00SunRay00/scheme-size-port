@@ -29,63 +29,73 @@ public class Internal implements AdminsTools {
 
     public String keyName() { return "internal"; }
 
-    public void manageRuleBool(boolean value, String name) {
-        if (unusable()) return;
+    public boolean manageRuleBool(boolean value, String name) {
+        if (unusable()) return false;
         try {
             Field fiel = Rules.class.getField(name);
             fiel.setBoolean(Vars.state.rules, value);
 
             Call.setRules(Vars.state.rules);
+            return true;
         } catch(Exception e){
             e.printStackTrace();
+            return false;
         }
     }
 
-    public void manageRuleStr(String value, String name) {
-        if (unusable()) return;
+    public boolean manageRuleStr(String value, String name) {
+        if (unusable()) return false;
         try {
             Field fiel = Rules.class.getField(name);
             setFieldValue(fiel, Vars.state.rules, value);
             Call.setRules(Vars.state.rules);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    public void manageTeamRuleBool(int teamId, boolean value, String name) {
-        if (unusable()) return;
+    public boolean manageTeamRuleBool(int teamId, boolean value, String name) {
+        if (unusable()) return false;
         try {
             Team team = Team.all[teamId];
             Rules.TeamRule tr = Vars.state.rules.teams.get(team);
             Field fiel = Rules.TeamRule.class.getField(name);
             fiel.setBoolean(tr, value);
             Call.setRules(Vars.state.rules);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    public void manageTeamRuleStr(int teamId, String value, String name) {
-        if (unusable()) return;
+    public boolean manageTeamRuleStr(int teamId, String value, String name) {
+        if (unusable()) return false;
         try {
             Team team = Team.all[teamId];
             Rules.TeamRule tr = Vars.state.rules.teams.get(team);
             Field fiel = Rules.TeamRule.class.getField(name);
             setFieldValue(fiel, tr, value);
             Call.setRules(Vars.state.rules);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
-    public void manageRuleObjectSet(String fieldName, arc.struct.ObjectSet<?> value) {
-        if (unusable()) return;
+    public boolean manageRuleObjectSet(String fieldName, arc.struct.ObjectSet<?> value) {
+        if (unusable()) return false;
         try {
             Field fiel = Rules.class.getField(fieldName);
             fiel.set(Vars.state.rules, value);
             Call.setRules(Vars.state.rules);
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
     }
 
@@ -228,7 +238,6 @@ public class Internal implements AdminsTools {
         Floor tileFloor = tile.floor();
 
         if ((floor != null && tile.floor() != floor) || (overlay != null && tile.overlay() != overlay))
-            if(overlay!=null) tile.setFloor(Blocks.water.asFloor());
             tile.setFloorNet(floor == null ? tileFloor : floor, overlay == null ? tile.overlay() : overlay);
 
         if (block != null && tile.block() != block) tile.setNet(block);

@@ -35,11 +35,21 @@ public class GammaAI extends AIController {
     public void updateUnit() {
         if (target == null || !target.isAdded()) return;
 
+        // the own mouseX/Y are updated by the vanilla input only while shooting
+        aim = target == player ? new Vec2(input.mouseWorldX(), input.mouseWorldY()) : new Vec2(target.mouseX, target.mouseY);
+
         move.update.get(this);
         build.update.get(this);
 
+        if (move == Updater.none) {
+            if (target == player || !target.shooting) unit.controlWeapons(false);
+            else {
+                unit.aim(aim);
+                unit.controlWeapons(true, true);
+            }
+        }
+
         player.boosting = target.boosting;
-        aim = new Vec2(target.mouseX, target.mouseY);
     }
 
     public void draw() {
@@ -56,6 +66,12 @@ public class GammaAI extends AIController {
     public void cache() {
         target = ai.players.get();
         cache = target == player ? player.tileOn() : target;
+        if (targetSelf() && move.needsTarget()) move = Updater.none;
+    }
+
+    /** Follow and circle make no sense around the own player. */
+    public boolean targetSelf() {
+        return target == null || target == player;
     }
 
     public float speed() {
@@ -92,6 +108,10 @@ public class GammaAI extends AIController {
 
         public String tooltip() {
             return "@gamma." + name();
+        }
+
+        public boolean needsTarget() {
+            return this == follow || this == circle;
         }
 
         private static void moveTo(GammaAI ai, Position pos) {
