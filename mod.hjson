@@ -28,7 +28,7 @@ author: '''
 [#0096FF]xzxADIxzx
 Port: 00SunRay00 & RE2b2m22
 '''
-minGameVersion: 159
+minGameVersion: 160
 version: 2.3.0
 hidden: true
 main: scheme.Main
