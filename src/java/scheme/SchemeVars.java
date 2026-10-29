@@ -105,12 +105,12 @@ public class SchemeVars {
             }
         });
         Events.on(EventType.WorldLoadEndEvent.class, event -> {
+            // the save or server may apply content patches (state.data) before the map ends loading,
+            // so the content lists are rebuilt for the patched content
             updateContent();
             if (settings.getInt("adminsway", 0) == 3) admins = AdminsConfigDialog.detectTools();
         });
-        Events.on(EventType.ClientCreateEvent.class,event ->updateContent());
         // m_schematics is created in Main to prevent dual loading
-        if(mods.getMod("claj") == null || !mods.getMod("claj").enabled())new com.xpdustry.claj.client.Main().init();
         m_input = mobile ? new ModedMobileInput() : new ModedDesktopInput();
 
         rulesetter = new RuleSetterDialog();
@@ -145,13 +145,20 @@ public class SchemeVars {
         initContent();
     }
     private static void updateContent(){
-
         units.refresh();
         builds.refresh();
 
-        unit = new ContentSelectDialog<>("@select.unit", content.units(), 0, 100, 1, value -> value == 0 ? "@select.unit.clear" : bundle.format("select.units", value));
-        effect = new ContentSelectDialog<>("@select.effect", content.statusEffects(), 0, 500 * 3600, 60, value -> value == 0 ? "@select.effect.clear" : bundle.format("select.seconds", value / 60f));
-        item = new ContentSelectDialog<>("@select.item", content.items(), -1000000, 1000000, 500, value -> value == 0 ? "@select.item.clear" : bundle.format("select.items", UI.formatAmount(value.longValue())));
+        // the number itself is in the editable field next to the label, so the label keeps only the unit
+        unit = new ContentSelectDialog<>("@select.unit", content.units(), 0, 100, 1, value -> value == 0 ? "@select.unit.clear" : unitName("select.units"));
+        effect = new ContentSelectDialog<>("@select.effect", content.statusEffects(), 0, 500 * 3600, 60, value -> value == 0 ? "@select.effect.clear" : unitName("select.seconds"));
+        effect.inputScale = 60f; // the slider holds ticks, the input is in seconds
+        effect.inputFloor = 0f; // 0 clears effects, negative durations make no sense
+        item = new ContentSelectDialog<>("@select.item", content.items(), -1000000, 1000000, 500, value -> value == 0 ? "@select.item.clear" : unitName("select.items"));
+    }
+
+    /** "{0} seconds" -> "seconds": the existing keys, translated in every bundle, without the number. */
+    private static String unitName(String key) {
+        return bundle.format(key, "").trim();
     }
     private  static void initContent(){
         serverUtils.init();

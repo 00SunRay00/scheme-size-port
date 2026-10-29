@@ -115,7 +115,12 @@ public class ModedMobileInput extends MobileInput implements ModedInputHandler, 
     @Override
     public void update() {
         super.update();
+        updateModed();
+        // isTap()/isRelease() compare against this, so it must be stored on every path, after all of them
+        lastTouched = input.isTouched(0);
+    }
 
+    private void updateModed() {
         if (locked()) return;
 
         if (observed != null) {
@@ -227,8 +232,6 @@ public class ModedMobileInput extends MobileInput implements ModedInputHandler, 
         }
 
         if (isRelease()) using = false;
-
-        lastTouched = input.isTouched();
     }
 
     public boolean hasMoved(int x, int y) {

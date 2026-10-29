@@ -5,8 +5,9 @@ plugins {
 version = '1.0'
 
 java {
+    // IDE language level only: Jabel lowers newer syntax, --release below sets the bytecode
     sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_1_8
 }
 
 configurations.matching { it.canBeResolved }.configureEach {
@@ -21,7 +22,7 @@ base {
 
 sourceSets {
     main {
-        java.srcDirs = ['src/java', 'src/java/api/src', 'src/java/client/src', 'src/java/common/src']
+        java.srcDirs = ['src/java']
         resources.srcDirs = ['src/resources']
     }
 }
@@ -40,7 +41,7 @@ ext {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs.addAll(['--release', '21'])
+    options.compilerArgs.addAll(['--release', '8'])
 }
 
 

@@ -1,5 +1,6 @@
 package scheme.ui;
 
+import arc.Events;
 import arc.func.Cons;
 import arc.input.KeyCode;
 import arc.scene.ui.TextArea;
@@ -13,6 +14,8 @@ import arc.util.Reflect;
 import arc.util.Strings;
 import arc.util.Timer;
 import arc.util.Timer.Task;
+import mindustry.game.EventType.ResetEvent;
+import mindustry.game.EventType.WorldLoadEvent;
 import mindustry.input.Binding;
 import mindustry.ui.Fonts;
 import mindustry.ui.Styles;
@@ -31,11 +34,18 @@ public class ConsoleFragment extends Table {
     public Seq<String> history = Reflect.get(ui.consolefrag, "history");
     public int position;
 
+    public Seq<TaskButton> scheduled = new Seq<>();
+
     public ConsoleFragment() {
         scene.add(this);
         scene.root.removeChild(ui.consolefrag);
 
-        ui.consolefrag.visibility = () -> true;
+        // replaces the vanilla visible() that also toggled on the console key (handled below);
+        // the vanilla update() handles the chat key itself, so it must not act while hidden
+        ui.consolefrag.visibility = ui.consolefrag::shown;
+
+        Events.on(WorldLoadEvent.class, event -> scheduled.each(TaskButton::stop));
+        Events.on(ResetEvent.class, event -> scheduled.each(TaskButton::stop));
 
         update(() -> {
             boolean shown = Reflect.get(ui.consolefrag, "shown");
@@ -63,13 +73,6 @@ public class ConsoleFragment extends Table {
                 }
 
                 Reflect.invoke(ui.consolefrag, "clearChatInput");
-            }
-
-            if (input.keyTap(Binding.chat) && settings.getBool("console")) {
-                TextField chatfield = Reflect.get(ui.consolefrag, "chatfield");
-                if (scene.getKeyboardFocus() == chatfield || !(scene.getKeyboardFocus() instanceof TextField)) {
-                    Reflect.invoke(ui.consolefrag, "toggle");
-                }
             }
 
             if (input.keyTap(KeyCode.tab) && !scene.hasKeyboard()) showTab(last.next());
@@ -196,16 +199,15 @@ public class ConsoleFragment extends Table {
         public Task task;
         public float interval = 1f;
         public String output;
-        public Runnable restart;
+        /** Code of the running task; edits take effect on the next run. */
+        public String code;
 
         public TaskButton() {
             super(Styles.black5);
             margin(4f).defaults().growX().padBottom(4f);
 
-            add(new ResizableArea("// write your code here", code -> {
-                if (task != null) task.cancel();
-                task = Timer.schedule(() -> output = mods.getScripts().runConsole(code), 0f, interval);
-            })).with(area -> restart = area.area::change).row();
+            ResizableArea area = new ResizableArea("// write your code here", text -> {});
+            add(area).row();
 
             table(input -> {
                 input.left();
@@ -215,7 +217,7 @@ public class ConsoleFragment extends Table {
                     interval = Strings.parseFloat(num, 1f);
                     if (interval < 0.01f) interval = 1f;
 
-                    restart.run(); // update task
+                    if (task != null && task.isScheduled()) schedule(interval); // keep running with the new interval
                 }).update(field -> {
                     if (scene.getKeyboardFocus() != field) field.setText(String.valueOf(interval));
                 }).width(200f).tooltip("@console.schedule.tooltip").row();
@@ -223,10 +225,27 @@ public class ConsoleFragment extends Table {
 
             labelWrap(() -> bundle.format("console.schedule.output", output != null && output.contains("\n") ? "\n" : " ", output)).row();
 
+            button("@play", Styles.cleart, () -> {
+                code = area.getText();
+                schedule(0f);
+            }).row();
+
             button("@console.schedule.cancel", Styles.cleart, () -> {
-                if (task != null) task.cancel();
+                stop();
+                scheduled.remove(this);
                 remove();
             }).padBottom(0f);
+
+            scheduled.add(this);
+        }
+
+        public void schedule(float delay) {
+            stop();
+            task = Timer.schedule(() -> output = mods.getScripts().runConsole(code), delay, interval);
+        }
+
+        public void stop() {
+            if (task != null) task.cancel();
         }
     }
 

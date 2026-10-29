@@ -71,7 +71,7 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
         if (mode == breaking) {
             drawBreakSelection(selectX, selectY, cursorX, cursorY, maxSchematicSize);
             drawSize(selectX, selectY, cursorX, cursorY, maxSchematicSize);
-        } else if (input.keyDown(Binding.schematicSelect) && !scene.hasKeyboard()) {
+        } else if (input.keyDown(Binding.schematicSelect) && schemX != -1 && !scene.hasKeyboard()) {
             drawSelection(schemX, schemY, cursorX, cursorY, maxSchematicSize);
             drawSize(schemX, schemY, cursorX, cursorY, maxSchematicSize);
         } else if (input.keyDown(Binding.rebuildSelect) && !scene.hasKeyboard()) {
@@ -126,7 +126,8 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
     @Override
     public void update() {
         lastCamera.set(camera.position);
-        super.update(); // prevent unit clear, is it a crutch?
+        // alternative combos run before vanilla input, so vanilla skips the same key this frame
+        if (!altTapInput()) super.update(); // prevent unit clear, is it a crutch?
 
         if (locked()) return;
 
@@ -227,18 +228,51 @@ public class ModedDesktopInput extends DesktopInput implements ModedInputHandler
         mode = none;
     }
 
-    public void buildInput() {
+    public boolean altDown() {
+        return state.isGame() && !locked() && !scene.hasKeyboard() && input.keyDown(SBinding.alternative);
+    }
 
-        if(Core.input.keyTap(SBinding.aiBind)) ai.show();
+    /** Alternative combos on vanilla keys. Returns true if one fired. */
+    public boolean altTapInput() {
+        if (!altDown()) return false;
+
+        if (input.keyTap(Binding.respawn)) {
+            if (!admins.isRestricted(DisabledTools.DESPAWN)) admins.despawn();
+        } else if (input.keyTap(Binding.mouseMove)) {
+            if (!admins.isRestricted(DisabledTools.TELEPORT)) admins.teleport(input.mouseWorld().cpy());
+        } else if (input.keyTap(Binding.pan)) lockMovement();
+        else if (input.keyTap(Binding.schematicSelect)) corefrag.nextLayer();
+        else if (input.keyTap(Binding.deselect)) hudfrag.building.flip();
+        else if (input.keyTap(Binding.schematicMenu)) flushLastRemoved();
+        else return false;
+
+        return true;
+    }
+
+    public void buildInput() {
+        boolean alt = altDown();
+        if (alt) {
+            if (!player.dead()) admins.look();
+            if (input.keyDown(Binding.rotatePlaced)) build.drop(tileX(), tileY());
+        }
+
+        if(Core.input.keyTap(SBinding.aiBind)) {
+            if (alt) ai.deselect();
+            else ai.select();
+        }
         if(Core.input.keyTap(SBinding.coreBind) && !admins.isRestricted(DisabledTools.CORE)) admins.placeCore();
         if(Core.input.keyTap(SBinding.despawnBind) && !admins.isRestricted(DisabledTools.DESPAWN)) admins.despawn();
         if(Core.input.keyTap(SBinding.effectBind) && !admins.isRestricted(DisabledTools.EFFECT)) admins.manageEffect();
         if(Core.input.keyTap(SBinding.itemBind) && !admins.isRestricted(DisabledTools.ITEM)) admins.manageItem();
         if(Core.input.keyTap(SBinding.teamBind) && !admins.isRestricted(DisabledTools.TEAM)) admins.manageTeam();
-        if(Core.input.keyTap(SBinding.unitBind) && !admins.isRestricted(DisabledTools.SPAWN)) admins.manageUnit();
+        if(Core.input.keyTap(SBinding.unitBind) && !admins.isRestricted(DisabledTools.SPAWN)) {
+            if (alt) admins.spawnUnits();
+            else admins.manageUnit();
+        }
         if(Core.input.keyTap(SBinding.unitSpawnBind) && !admins.isRestricted(DisabledTools.SPAWN)) admins.spawnUnits();
         if(Core.input.keyTap(SBinding.teleportBind) && !admins.isRestricted(DisabledTools.TELEPORT)) admins.teleport();
-        if(Core.input.keyTap(SBinding.deletePLayer)) admins.deletePlyaer();;
+        // deletePlayer moves players to derelict and despawns them
+        if(Core.input.keyTap(SBinding.deletePLayer) && !admins.isRestricted(DisabledTools.TEAM | DisabledTools.DESPAWN)) admins.deletePlayer();
         if (!hudfrag.building.fliped) build.setMode(Mode.none);
         if (build.mode == Mode.none) return;
 

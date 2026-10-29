@@ -2,6 +2,7 @@ package scheme.tools.admins;
 
 import arc.math.geom.Position;
 import arc.struct.Seq;
+import mindustry.ctype.MappableContent;
 import mindustry.entities.units.BuildPlan;
 import mindustry.game.Team;
 import mindustry.gen.Call;
@@ -14,6 +15,8 @@ import mindustry.world.blocks.storage.CoreBlock.CoreBuild;
 import scheme.tools.MessageQueue;
 import scheme.tools.RainbowTeam;
 
+import java.util.regex.Pattern;
+
 import static arc.Core.*;
 import static mindustry.Vars.*;
 import static scheme.SchemeVars.*;
@@ -22,49 +25,80 @@ public class Mindurka implements AdminsTools {
 
     public String keyName() { return "darkdustry"; }
 
-    public void manageRuleBool(boolean value, String name) {
-        if (unusable()) return;
+    public boolean manageRuleBool(boolean value, String name) {
+        if (unusable()) return false;
         send("setrule", name, Boolean.toString(value));
+        return true;
     }
 
-    private int min(int a, int b) {
-        return a == -1 ? b : b == -1 ? a : Math.min(a, b);
+    public boolean manageRuleStr(String value, String name) {
+        if (unusable()) return false;
+        send("setrule", name, Args.ruleValue(value));
+        return true;
     }
-    public void manageRuleStr(String value, String name) {
-        if (unusable()) return;
-        StringBuilder actualValue = new StringBuilder();
-        int i = 0;
-        while (i != value.length()) {
-            int o = min(
-                    min(value.indexOf("\"", i), value.indexOf("\\", i)),
-                    min(value.indexOf("\r", i), value.indexOf("\n", i))
-            );
-            if (o == -1) {
-                actualValue.append(value, i, value.length() - i);
-                break;
-            }
-            if (i != o) {
-                actualValue.append(value, i, o);
-            }
-            switch (value.charAt(o)) {
-                case '\"': actualValue.append("\\\""); break;
-                case '\\': actualValue.append("\\\\"); break;
-                case '\n': actualValue.append("\\\n"); break;
-                case '\r': actualValue.append("\\\r"); break;
-                default: throw new IllegalStateException("Cannot escape symbol '"+value.charAt(o)+"'");
-            }
-            i = o + 1;
+
+    public boolean manageTeamRuleBool(int teamId, boolean value, String name) {
+        ui.showInfoFade("@admins.notsupported");
+        return false;
+    }
+
+    public boolean manageTeamRuleStr(int teamId, String value, String name) {
+        ui.showInfoFade("@admins.notsupported");
+        return false;
+    }
+
+    /** CorePlugin /setrule reads the JSON into the rule field: a ban list is an array of content names. */
+    public boolean manageRuleObjectSet(String fieldName, arc.struct.ObjectSet<?> value) {
+        if (unusable()) return false;
+
+        Seq<String> names = new Seq<>();
+        for (Object content : value) names.add(((MappableContent) content).name);
+        String command = netServer.clientCommands.getPrefix() + "setrule " + fieldName + " " + Args.jsonArray(names);
+
+        // chars (String.length), as NetClient.sendChatMessage compares the message with maxTextLength (NetClient.java:328)
+        if (command.length() > maxTextLength) {
+            ui.showInfoFade(bundle.format("scheme.rule.toolong", command.length(), maxTextLength));
+            return false;
         }
-        send("setrule", name, '"'+actualValue.toString()+'"');
+
+        MessageQueue.send(command);
+        return true;
     }
 
-    public void manageTeamRuleBool(int teamId, boolean value, String name) {
-    }
+    /** Command argument formatting; a nested class so it loads without the game (AdminsTools needs a bundle). */
+    public static final class Args {
+        private static final Pattern number = Pattern.compile("-?\\d+(\\.\\d+)?([eE][-+]?\\d+)?");
 
-    public void manageTeamRuleStr(int teamId, String value, String name) {
-    }
+        /** Plain numbers go as is, anything else as a quoted string. */
+        public static String ruleValue(String value) {
+            return number.matcher(value).matches() ? value : quote(value);
+        }
 
-    public void manageRuleObjectSet(String fieldName, arc.struct.ObjectSet<?> value) {
+        /** Double-quoted string with backslash, quote, \n and \r escaped. */
+        public static String quote(String value) {
+            StringBuilder out = new StringBuilder(value.length() + 2).append('"');
+            for (int i = 0; i < value.length(); i++) {
+                char c = value.charAt(i);
+                switch (c) {
+                    case '"': out.append("\\\""); break;
+                    case '\\': out.append("\\\\"); break;
+                    case '\n': out.append("\\n"); break;
+                    case '\r': out.append("\\r"); break;
+                    default: out.append(c);
+                }
+            }
+            return out.append('"').toString();
+        }
+
+        /** JSON array of quoted strings, without spaces to save command length. */
+        public static String jsonArray(Iterable<String> values) {
+            StringBuilder out = new StringBuilder("[");
+            for (String value : values) {
+                if (out.length() > 1) out.append(',');
+                out.append(quote(value));
+            }
+            return out.append(']').toString();
+        }
     }
 
     public void manageUnit() {
@@ -79,8 +113,7 @@ public class Mindurka implements AdminsTools {
         if (unusable()) return;
         unit.select(true, false, true, (target, team, unit, amount) -> {
             if (amount == 0f) {
-                if(unit!=null) send("despawntype",unit.name);
-                else send("depsawn");
+                send("despawntype", unit.name);
                 return;
             }
 
@@ -130,8 +163,8 @@ public class Mindurka implements AdminsTools {
 
     public void despawn(Player target) {
         if (unusable()) return;
-        if (target.unit() != null) send("despawn",target.team().id, "#" + target.unit().id);
-        else if(target==null) send("despawn");
+        if (target == null) send("despawn");
+        else if (target.unit() != null) send("despawn", target.team().id, "#" + target.unit().id);
     }
 
     public void teleport(Position pos) {
